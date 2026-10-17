@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef MACRO_H
 #define MACRO_H
 
+#include <stdio.h>
+
 #define escapeyellow "\x1b[33m"
 #define escapebold "\x1b[1m"
 #define escapereset "\x1b[0m"

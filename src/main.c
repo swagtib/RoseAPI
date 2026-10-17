@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <frida-gum.h>
 #include "macro.h"
 #include <unistd.h>
+#include "engine.h"
 
 void __attribute__((constructor)) start()
 {
@@ -36,5 +37,7 @@ void __attribute__((constructor)) start()
         _exit(1);
     }
     LOG("base addr %#lx\n", range->base_address);
+    init_alpha_38f(range->base_address);
+    
     return;    
 }
