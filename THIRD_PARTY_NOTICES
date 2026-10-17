@@ -1,0 +1,6 @@
+RoseAPI uses code from the following repositories:
+
+frida/frida-gum
+https://github.com/frida/frida-gum
+Licensed under the wxWindows Library Licence, Version 3.1
+See https://github.com/frida/frida-gum/blob/main/COPYING
