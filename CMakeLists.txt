@@ -34,6 +34,9 @@ if(NOT EXISTS "${FRIDA_GUM_DEVKIT_DIR}/frida-gum.h" OR NOT EXISTS "${FRIDA_GUM_D
     message(FATAL_ERROR "frida-gum.h / libfrida-gum.a not found")
 endif()
 
+find_path(TCC_INCLUDE_DIR libtcc.h HINTS "/usr/local/include" REQUIRED)
+find_library(TCC_LIBRARY NAMES tcc HINTS "/usr/local/include" REQUIRED)
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
@@ -49,11 +52,12 @@ add_library(RoseAPI SHARED ${SOURCES})
 
 target_include_directories(RoseAPI
     PUBLIC  "${CMAKE_SOURCE_DIR}/src"
-    PRIVATE "${FRIDA_GUM_DEVKIT_DIR}"
+    PRIVATE "${FRIDA_GUM_DEVKIT_DIR}" "${TCC_INCLUDE_DIR}"
 )
 
 target_link_libraries(RoseAPI PRIVATE
     "${FRIDA_GUM_DEVKIT_DIR}/libfrida-gum.a"
+    "${TCC_LIBRARY}"
     dl m rt pthread
 )
 

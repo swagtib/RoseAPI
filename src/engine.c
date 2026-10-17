@@ -23,7 +23,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "engine.h"
 #include <stdint.h>
+#include "frida-gum.h"
 #include "macro.h"
+#include "hooks.h"
+
+static gpointer resetTramp;
+
+static void resetgameover(void)
+{
+    resetGame_ft tramp = resetTramp;
+    tramp();
+    gum_interceptor_revert(interceptor, resetGame);
+    LOG("engine is ready\n");
+    // do plugin loading stuff here
+}
+
+void engine_safety_net(void)
+{
+    gum_interceptor_replace(interceptor, resetGame, resetgameover, &resetTramp, NULL);
+}
 
 deleteBond_ft deleteBond;
 accountDeathTax_ft accountDeathTax;

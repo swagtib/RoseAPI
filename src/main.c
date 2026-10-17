@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <frida-gum.h>
+#include "hooks.h"
 #include "macro.h"
 #include <unistd.h>
 #include "engine.h"
@@ -37,7 +38,13 @@ void __attribute__((constructor)) start()
         _exit(1);
     }
     LOG("base addr %#lx\n", range->base_address);
+    interceptor = gum_interceptor_obtain();
+    if (!interceptor)
+    {
+        LOG_ERROR("failed to obtain interceptor\n");
+        _exit(1);
+    }
     init_alpha_38f(range->base_address);
-    
+    engine_safety_net();
     return;    
 }

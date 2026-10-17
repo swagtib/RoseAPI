@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 void init_alpha_38f(uintptr_t base);
+void engine_safety_net(void);
 
 struct Vector {
     float x;
