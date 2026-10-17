@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "frida-gum.h"
 #include "macro.h"
 #include "hooks.h"
+#include "plugin.h"
 
 static gpointer resetTramp;
 
@@ -35,7 +36,8 @@ static void resetgameover(void)
     tramp();
     gum_interceptor_revert(interceptor, resetGame);
     LOG("engine is ready\n");
-    // do plugin loading stuff here
+    plugins_setup();
+    loadenabled_plugins();
 }
 
 void engine_safety_net(void)
