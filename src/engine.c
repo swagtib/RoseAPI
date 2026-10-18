@@ -26,6 +26,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "frida-gum.h"
 #include "macro.h"
 #include "hooks.h"
+#include "cli.h"
+#include <unistd.h>
 
 static gpointer resetTramp;
 
@@ -35,7 +37,8 @@ static void resetgameover(void)
     tramp();
     gum_interceptor_revert(interceptor, resetGame);
     LOG("engine is ready\n");
-}
+    if (!startCLI()) _exit(1); // wrap this in a function that calls other functions later
+} // possibly rewrite the engine safety net too?
 
 void engine_safety_net(void)
 {
