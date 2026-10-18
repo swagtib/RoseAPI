@@ -21,4 +21,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 typedef void (*CLICallback)(int argc, char **args);
 int startCLI(void);
+
+typedef struct {
+    char *name;
+    CLICallback callback;
+} Command;
+
 #endif

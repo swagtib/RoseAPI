@@ -25,23 +25,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 static GHashTable *clitable;
 
-int addclicommand(const char* command_name, CLICallback callback) {
-    if (strchr(command_name, ' ') != NULL)
-    {
-        LOG_ERROR("command '%s' contains spaces\n", command_name);
-        return 0;
-    }
-    int exists = g_hash_table_contains(clitable, command_name);
-    if (exists)
-    {
-        LOG_ERROR("command '%s' already exists\n", command_name);
-        return 0;
-    }
-    g_hash_table_insert(clitable, (gpointer)command_name, callback);
-    LOG("registererd cli %s\n", command_name);
-    return 1;
-}
-
 static void* handle_cli_input(void* arg)
 {
     char* line = NULL;
@@ -58,10 +41,10 @@ static void* handle_cli_input(void* arg)
 
         if (argc > 0)
         {
-            CLICallback callback = g_hash_table_lookup(clitable, argv[0]);
-            if (callback != NULL)
+            Command* cmd = g_hash_table_lookup(clitable, argv[0]);
+            if (cmd != NULL && cmd->callback != NULL)
             {
-                callback(argc - 1, &argv[1]);
+                cmd->callback(argc - 1, &argv[1]);
             } else LOG_ERROR("command '%s' doesn't exist\n", argv[0]);
         }
         g_strfreev(argv);
