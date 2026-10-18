@@ -28,13 +28,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "hooks.h"
 #include "cli.h"
 #include <unistd.h>
-#include "plugin/plugin.h"
 
 static gpointer resetTramp;
 
 static void setupapi(void)
 {
-    if (!startCLI() || !setupPlugins())
+    if (!startCLI())
     {
         _exit(1);
     }
