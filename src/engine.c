@@ -27,8 +27,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "macro.h"
 #include "hooks.h"
 #include "cli.h"
+#include "plugin/plugin.h"
 #include <unistd.h>
-
 static gpointer resetTramp;
 
 static void setupapi(void)
@@ -36,6 +36,7 @@ static void setupapi(void)
     if (!startCLI()) _exit(1);
     clitable = g_hash_table_new(g_str_hash, _frida_g_str_equal);
     if (!clitable) _exit(1);
+    if (!setupPlugins()) _exit(1);
 }
 
 static void resetgameover(void)
