@@ -18,13 +18,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef CLI_H
 #define CLI_H
+#include <frida-gum.h>
 
 typedef void (*CLICallback)(int argc, char **args);
 int startCLI(void);
 
 typedef struct {
-    char *name;
+    const char *name;
     CLICallback callback;
 } Command;
+
+GHashTable *clitable;
 
 #endif

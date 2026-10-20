@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "macro.h"
 #include <unistd.h>
 
-static GHashTable *clitable;
+GHashTable *clitable;
 
 static void* handle_cli_input(void* arg)
 {
