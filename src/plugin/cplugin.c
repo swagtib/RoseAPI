@@ -16,27 +16,26 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "plugin/cplugin.h"
-#include "plugin.h"
+#include "plugin/plugin.h"
 #include <libtcc.h>
+#include "plugin/cplugin.h"
 
-Plugin* createCPlugin(const char *path)
+Plugin* loadCPlugin(const char *path)
 {
     TCCState* state = tcc_new();
-    if (!state) return 0;
-    if (tcc_set_output_type(state, TCC_OUTPUT_MEMORY) == -1) goto cleanup;
-    if (tcc_add_file(state, path) == -1) goto cleanup;
-    if (tcc_relocate(state) == -1) goto cleanup;
+    if (!state) return NULL;
+    if (tcc_set_output_type(state, TCC_OUTPUT_MEMORY) == -1) goto cleanupstate;
+    if (tcc_add_file(state, path) == -1) goto cleanupstate;
+    if (tcc_relocate(state) == -1) goto cleanupstate;
     void (*plugin_init)(void) = tcc_get_symbol(state, "plugin_init");
-    if (!plugin_init) goto cleanup;
-    Plugin* plugin = createplugin();
-    if (!plugin) goto cleanup;
-    plugin->ptype = CPLUGIN_PTYPE;
+    if (!plugin_init) goto cleanupstate;
+    Plugin* plugin = constructplugin();
+    if (!plugin) goto cleanupstate;
+    plugin->ptype = C_PLUGIN_PTYPE;
     plugin->state = state;
     plugin_init();
     return plugin;
-
-    cleanup:
+    cleanupstate:
     tcc_delete(state);
-    return 0;
+    return NULL;
 }

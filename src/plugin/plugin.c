@@ -17,18 +17,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "plugin/plugin.h"
-#include "frida-gum.h"
-#include <stdio.h>
+#include <libtcc.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <stdio.h>
+#include "cli.h"
+#include "macro.h"
 #include "plugin/cplugin.h"
-#include <sys/stat.h>
-#include <errno.h>
+#include <frida-gum.h>
 
-static GHashTable *plugins;
+static GHashTable* plugins = NULL;
 
-Plugin* createplugin(void)
+Plugin* constructplugin(void)
 {
     Plugin* plugin = malloc(sizeof(Plugin));
     if (!plugin) return NULL;
@@ -37,68 +37,154 @@ Plugin* createplugin(void)
     return plugin;
 }
 
-void destroyplugin(Plugin* ptr)
+void destructplugin(Plugin* ptr)
 {
     if (!ptr) return;
+    if (ptr->ptype != -1 && ptr->state)
+    {
+        if (ptr->ptype == C_PLUGIN_PTYPE) tcc_delete(ptr->state);
+    }
     free(ptr);
+    return;
 }
 
 static int loadplugin(const char *name)
 {
-    if (g_hash_table_contains(plugins, name)) return 0;
     char *ext = strrchr(name, '.');
     if (!ext) return 0;
     char *path;
     if (asprintf(&path, "plugins/%s", name) == -1) return 0;
-    if (access(path, R_OK | F_OK) != 0)
+    FILE* file = fopen(path, "r");
+    if (!file)
     {
         free(path);
         return 0;
     }
-    Plugin* plugin;
-    if (strcmp(ext, ".c") == 0) plugin = createCPlugin(path);
+    fclose(file);
+    Plugin* plugin = NULL;
+    if (strcmp(ext, ".c") == 0) plugin = loadCPlugin(path);
     free(path);
     if (!plugin) return 0;
-    g_hash_table_insert(plugins, (gpointer)name, plugin);
+    g_hash_table_insert(plugins, strdup(name), plugin);
     return 1;
 }
 
-static int mkdirplugins(void)
+void enableplugin(ARGSCLI)
 {
-    int status = mkdir("plugins", 0755);
-    if ((status == 0) || (status == -1 && errno == EEXIST)) return 1;
-    return 0;
+    if (argc < 1) return;
+    g_strchomp(args[0]);
+    if (g_hash_table_contains(plugins, args[0])) return;
+    int status = loadplugin(args[0]);
+    if (!status)
+    {
+        LOG_ERROR("failed to load plugin '%s'\n", args[0]);
+    } else LOG("loaded plugin '%s'\n", args[0]);
+    FILE* file = fopen("disabledplugins.txt", "r");
+    if (!file) return;
+    FILE* temp = fopen("tmpdplg", "w");
+    if (!temp)
+    {
+        fclose(file);
+        return;
+    }
+    char *buffer = NULL;
+    while (getline(&buffer, 0x0, file) != -1)
+    {
+        if (strstr(buffer, args[0]) == NULL)
+        {
+            fputs(buffer, temp);
+        }
+    }
+    free(buffer);
+    fclose(temp);
+    fclose(file);
+    remove("disabledplugins.txt");
+    rename("tmpdplg", "disabledplugins.txt");
 }
 
-static void populateTxt(void)
+void disableplugin(ARGSCLI)
 {
-    FILE* file = fopen("enabledplugins.txt", "a+");
+    if (argc < 1) return;
+    g_strchomp(args[0]);
+    if (!g_hash_table_contains(plugins, args[0])) return;
+    Plugin* plugin = g_hash_table_lookup(plugins, args[0]);
+    g_hash_table_remove(plugins, args[0]);
+    if (!plugin) return;
+    destructplugin(plugin);
+    LOG("unloaded plugin '%s'\n", args[0]);
+    FILE* file = fopen("disabledplugins.txt", "a+");
     if (!file) return;
+    int found = 0;
+    char *buffer = NULL;
     rewind(file);
-    if (fgetc(file) == EOF && !ferror(file)) 
+    while (getline(&buffer, 0x0, file) != -1)
     {
-        DIR* dir = opendir("plugins");
-        if (!dir)
+        buffer[strcspn(buffer, "\r\n")] = '\0';
+        if (strcmp(buffer, args[0]) == 0)
         {
-            fclose(file);
-            return;
+            found = 1;
+            break;
         }
-        struct dirent *entry;
-        while ((entry = readdir(dir)) != NULL)
-        {
-            if (entry->d_name[0] == '.') continue;
-            fprintf(file, "%s\n", entry->d_name);
-        }
-        closedir(dir);
+    }
+    free(buffer);
+    if (!found)
+    {
+        fprintf(file, "%s\n", args[0]);
     }
     fclose(file);
+    return;
 }
 
 int setupPlugins(void)
 {
     plugins = g_hash_table_new(g_str_hash, _frida_g_str_equal);
     if (!plugins) return 0;
-    if (!mkdirplugins()) return 0;
-    populateTxt();
+    FILE* file = fopen("disabledplugins.txt", "r");
+    if (file)
+    {
+        char **disabled = NULL;
+        int count = 0;
+        char *buffer = NULL;
+        while (getline(&buffer, 0x0, file) != -1)
+        {
+            buffer[strcspn(buffer, "\r\n")] = '\0';
+            char **temp = realloc(disabled, (count + 1) * sizeof(char *));
+            if (!temp) continue;
+            disabled = temp;
+            disabled[count] = strdup(buffer);
+            count++;
+        }
+        fclose(file);
+        free(buffer);
+        DIR* dir = opendir("plugins");
+        if (dir)
+        {
+            struct dirent *entry;
+            while ((entry = readdir(dir)) != NULL)
+            { 
+                if (entry->d_name[0] == '.') continue;
+                g_strchomp(entry->d_name);
+                int isdisabled = 0;
+                for (int i = 0; i < count; i++)
+                {
+                    if (strcmp(entry->d_name, disabled[i]) == 0) isdisabled = 1;
+                }
+                if (!isdisabled)
+                {
+                    int status = loadplugin(entry->d_name);
+                    if (status) LOG("auto loaded '%s'\n", entry->d_name);
+                }
+            }
+            closedir(dir);
+        }
+        for (int i = 0; i < count; i++)
+        {
+            if (disabled[i] != NULL)
+            {
+                free(disabled[i]);
+            }
+        }
+        free(disabled);
+    }
     return 1;
 }

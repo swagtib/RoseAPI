@@ -18,15 +18,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef PLUGIN_H
 #define PLUGIN_H
-#include <frida-gum.h>
+#include "cli.h"
 
 typedef struct {
     unsigned int ptype;
-    void *state;
+    void* state;
 } Plugin;
 
-Plugin* createplugin(void);
-void destroyplugin(Plugin* ptr);
+Plugin* constructplugin(void);
+void destructplugin(Plugin* ptr);
+void enableplugin(ARGSCLI);
+void disableplugin(ARGSCLI);
 int setupPlugins(void);
 
 #endif

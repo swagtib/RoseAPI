@@ -19,8 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef CPLUGIN_H
 #define CPLUGIN_H
 
-#define CPLUGIN_PTYPE 0
-#include "plugin.h"
-Plugin* createCPlugin(const char *path);
+#define C_PLUGIN_PTYPE 0
+#include "plugin/plugin.h"
+Plugin* loadCPlugin(const char *path);
 
 #endif

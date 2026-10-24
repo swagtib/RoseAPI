@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include "macro.h"
+#include "plugin/plugin.h"
 #include <unistd.h>
 
 GHashTable *clitable;
@@ -57,6 +58,16 @@ int startCLI(void)
 {
     clitable = g_hash_table_new(g_str_hash, _frida_g_str_equal);
     if (!clitable) return 0;
+    Command* cmd = malloc(sizeof(Command));
+    if (!cmd) return 0;
+    cmd->callback = enableplugin;
+    cmd->name = "enableplugin";
+    g_hash_table_insert(clitable, "enableplugin", cmd);
+    cmd = malloc(sizeof(Command));
+    if (!cmd) return 0;
+    cmd->callback = disableplugin;
+    cmd->name = "disableplugin";
+    g_hash_table_insert(clitable, "disableplugin", cmd);
     pthread_t thread;
     if (pthread_create(&thread, NULL, &handle_cli_input, NULL) != 0) return 0;
     if (pthread_detach(thread) != 0) return 0;
