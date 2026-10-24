@@ -22,9 +22,42 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include "macro.h"
 #include "plugin/plugin.h"
+#include "roseapi.h"
+#include <string.h>
 #include <unistd.h>
 
-GHashTable *clitable;
+static GHashTable *clitable;
+
+int addclicommand(PluginContext ctx, const char *command, CLICallback callback)
+{
+    if (!ctx || !callback || !command) return 0;
+    char *name = strdup(command);
+    if (!name) return 0;
+    g_strchomp(name);
+    if (strchr(name, ' ') != NULL)
+    {
+        free(name);
+        return 0;
+    }
+    if (g_hash_table_contains(clitable, name))
+    {
+        LOG_ERROR("command '%s' is already registered\n", name);
+        free(name);
+        return 0;
+    }
+    Command* cmd = malloc(sizeof(Command));
+    if (!cmd)
+    {
+        free(name);
+        return 0;
+    }
+    cmd->name = name;
+    cmd->callback = callback;
+    Plugin* plugin = ctx;
+    g_ptr_array_add(plugin->clicommands, cmd);
+    g_hash_table_insert(clitable, name, cmd);
+    return 1;
+}
 
 static void* handle_cli_input(void* arg)
 {
@@ -57,7 +90,6 @@ static void* handle_cli_input(void* arg)
 int startCLI(void)
 {
     clitable = g_hash_table_new(g_str_hash, _frida_g_str_equal);
-    if (!clitable) return 0;
     Command* cmd = malloc(sizeof(Command));
     if (!cmd) return 0;
     cmd->callback = enableplugin;

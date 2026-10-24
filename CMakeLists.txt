@@ -51,7 +51,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
 add_library(RoseAPI SHARED ${SOURCES})
 
 target_include_directories(RoseAPI
-    PUBLIC  "${CMAKE_SOURCE_DIR}/src"
+    PUBLIC  "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/public"
     PRIVATE "${FRIDA_GUM_DEVKIT_DIR}" "${TCC_INCLUDE_DIR}"
 )
 

@@ -19,10 +19,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef PLUGIN_H
 #define PLUGIN_H
 #include "cli.h"
+#include "frida-gum.h"
 
 typedef struct {
     unsigned int ptype;
     void* state;
+    GPtrArray* clicommands;
 } Plugin;
 
 Plugin* constructplugin(void);

@@ -34,6 +34,7 @@ Plugin* constructplugin(void)
     if (!plugin) return NULL;
     memset(plugin, 0x0, sizeof(Plugin));
     plugin->ptype = -1;
+    plugin->clicommands = g_ptr_array_new();
     return plugin;
 }
 
@@ -138,7 +139,6 @@ void disableplugin(ARGSCLI)
 int setupPlugins(void)
 {
     plugins = g_hash_table_new(g_str_hash, _frida_g_str_equal);
-    if (!plugins) return 0;
     FILE* file = fopen("disabledplugins.txt", "r");
     if (file)
     {
