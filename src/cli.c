@@ -51,12 +51,20 @@ int addclicommand(PluginContext ctx, const char *command, CLICallback callback)
         free(name);
         return 0;
     }
-    cmd->name = name;
+    cmd->name = strdup(name);
     cmd->callback = callback;
     Plugin* plugin = ctx;
     g_ptr_array_add(plugin->clicommands, cmd);
     g_hash_table_insert(clitable, name, cmd);
     return 1;
+}
+
+void removeclibyname(const char *name)
+{
+    if (g_hash_table_contains(clitable, name))
+    {
+        g_hash_table_remove(clitable, name);
+    }
 }
 
 static void* handle_cli_input(void* arg)

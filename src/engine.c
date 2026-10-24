@@ -34,7 +34,7 @@ static gpointer resetTramp;
 
 static void setupapi(void)
 {
-    if (!startCLI() || !setupPlugins()) _exit(1);
+    if (!startCLI() || !setupPlugins() || !setuphooks()) _exit(1);
 }
 
 static void resetgameover(void)

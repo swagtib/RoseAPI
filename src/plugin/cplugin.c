@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "plugin/plugin.h"
 #include <libtcc.h>
 #include "plugin/cplugin.h"
+#include <roseapi.h>
 
 Plugin* loadCPlugin(const char *path)
 {
@@ -27,13 +28,13 @@ Plugin* loadCPlugin(const char *path)
     if (tcc_set_output_type(state, TCC_OUTPUT_MEMORY) == -1) goto cleanupstate;
     if (tcc_add_file(state, path) == -1) goto cleanupstate;
     if (tcc_relocate(state) == -1) goto cleanupstate;
-    void (*plugin_init)(void) = tcc_get_symbol(state, "plugin_init");
+    void (*plugin_init)(PluginContext) = tcc_get_symbol(state, "plugin_init");
     if (!plugin_init) goto cleanupstate;
     Plugin* plugin = constructplugin();
     if (!plugin) goto cleanupstate;
     plugin->ptype = C_PLUGIN_PTYPE;
     plugin->state = state;
-    plugin_init();
+    plugin_init(plugin);
     return plugin;
     cleanupstate:
     tcc_delete(state);

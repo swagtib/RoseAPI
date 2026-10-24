@@ -22,8 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <string.h>
 #include <stdio.h>
 #include "cli.h"
+#include "hooks.h"
 #include "macro.h"
 #include "plugin/cplugin.h"
+#include "roseapi.h"
 #include <frida-gum.h>
 
 static GHashTable* plugins = NULL;
@@ -41,6 +43,20 @@ Plugin* constructplugin(void)
 void destructplugin(Plugin* ptr)
 {
     if (!ptr) return;
+    if (ptr->clicommands)
+    {
+        int size = ptr->clicommands->len;
+        for (int i = 0; i < size; i++)
+        {
+            Command* cmd = g_ptr_array_index(ptr->clicommands, i);
+            if (!cmd) continue;
+            removeclibyname(cmd->name);
+            free(cmd->name);
+            free(cmd);
+        }
+        g_ptr_array_free(ptr->clicommands, 0);
+    }
+    destroypluginhooks(ptr);
     if (ptr->ptype != -1 && ptr->state)
     {
         if (ptr->ptype == C_PLUGIN_PTYPE) tcc_delete(ptr->state);

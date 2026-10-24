@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef MACRO_H
 #define MACRO_H
 
-#include <stdio.h>
-
 #define STRINGIFY_HELPER(x) #x
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
 

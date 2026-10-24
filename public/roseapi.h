@@ -24,5 +24,6 @@ typedef void (*CLICallback)(int argc, char **args);
 #define ARGSCLI int argc, char **args
 typedef void* PluginContext;
 int addclicommand(PluginContext ctx, const char *command, CLICallback callback);
+int addhook(PluginContext ctx, const char* hookname, void* callback);
 
 #endif

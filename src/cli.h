@@ -24,8 +24,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 int startCLI(void);
 
 typedef struct {
-    const char *name;
+    char *name;
     CLICallback callback;
 } Command;
+
+void removeclibyname(const char *name);
 
 #endif

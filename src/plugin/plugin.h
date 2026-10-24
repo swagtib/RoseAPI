@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef PLUGIN_H
 #define PLUGIN_H
-#include "cli.h"
+#include <roseapi.h>
 #include "frida-gum.h"
 
 typedef struct {
