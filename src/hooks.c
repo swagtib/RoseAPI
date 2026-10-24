@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "plugin/plugin.h"
 #include "roseapi.h"
 #include <frida-gum.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 GumInterceptor *interceptor = NULL;
