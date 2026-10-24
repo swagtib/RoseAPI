@@ -144,10 +144,6 @@ void disableplugin(ARGSCLI)
         }
     }
     free(buffer);
-    if (!found)
-    {
-        fprintf(file, "%s\n", args[0]);
-    }
     fclose(file);
     return;
 }

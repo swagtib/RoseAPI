@@ -28,6 +28,15 @@ typedef struct {
     CLICallback callback;
 } Command;
 
+typedef struct {
+    Command* cmd;
+    int argc;
+    char **argv;
+    char *name;
+} ExecutedCommand;
+
 void removeclibyname(const char *name);
+extern GAsyncQueue* commandstorun;
+int clicommandexists(const char *name);
 
 #endif

@@ -33,7 +33,7 @@ int setuphooks(void);
 void destroypluginhooks(Plugin* ptr);
 
 #define GET_TRAMPOLINE(x) CONCAT(x, Tramp)
-#define CREATE_TRAMPOLINE(x) static gpointer GET_TRAMPOLINE(x)
+#define CREATE_TRAMPOLINE(x) static gpointer GET_TRAMPOLINE(x);
 #define GET_CALLBACK(x) CONCAT(x, Hook)
 
 #define CREATE_HOOK(name, func) \
@@ -86,7 +86,6 @@ if (list) \
 CREATE_TRAMPOLINE(name); \
 static void GET_CALLBACK(name) sig \
 { \
-    pthread_mutex_lock(&hookmutex); \
     RUN_VOID_HOOK(name, cast, args) \
     if (!vetoed) \
     { \
@@ -94,14 +93,12 @@ static void GET_CALLBACK(name) sig \
         RUN_VOID_HOOK(CONCAT(Post, name), cast, args) \
     } \
     vetoed = 0; \
-    pthread_mutex_unlock(&hookmutex); \
 }
 
 #define CREATE_STD_CALLBACK(name, sig, cast, args, returntype) \
 CREATE_TRAMPOLINE(name); \
 static returntype GET_CALLBACK(name) sig \
 { \
-    pthread_mutex_lock(&hookmutex); \
     returntype returnval = 0x0; \
     RUN_HOOK(name, cast, args, returnval) \
     if (!vetoed) \
@@ -110,7 +107,6 @@ static returntype GET_CALLBACK(name) sig \
         RUN_HOOK(CONCAT(Post, name), cast, args, returnval) \
     } \
     vetoed = 0; \
-    pthread_mutex_unlock(&hookmutex); \
     return returnval; \
 }
 

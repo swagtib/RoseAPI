@@ -17,16 +17,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "cli.h"
+#include <bits/pthreadtypes.h>
 #include <frida-gum.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "macro.h"
 #include "plugin/plugin.h"
-#include "roseapi.h"
+#include <roseapi.h>
 #include <string.h>
 #include <unistd.h>
 
 static GHashTable *clitable;
+GAsyncQueue* commandstorun;
 
 int addclicommand(PluginContext ctx, const char *command, CLICallback callback)
 {
@@ -67,6 +69,8 @@ void removeclibyname(const char *name)
     }
 }
 
+int clicommandexists(const char *name) { return g_hash_table_contains(clitable, name); }
+
 static void* handle_cli_input(void* arg)
 {
     char* line = NULL;
@@ -86,10 +90,24 @@ static void* handle_cli_input(void* arg)
             Command* cmd = g_hash_table_lookup(clitable, argv[0]);
             if (cmd != NULL && cmd->callback != NULL)
             {
-                cmd->callback(argc - 1, &argv[1]);
-            } else LOG_ERROR("command '%s' doesn't exist\n", argv[0]);
+                ExecutedCommand* torun = malloc(sizeof(ExecutedCommand));
+                if (!torun)
+                {
+                    g_strfreev(argv);
+                    continue;
+                }
+                torun->cmd = cmd;
+                torun->argc = argc;
+                torun->argv = argv;
+                //torun->name = strdup(cmd->name);
+                g_async_queue_push(commandstorun, torun);
+            } else
+            {
+                LOG_ERROR("command '%s' doesn't exist\n", argv[0]);
+                g_strfreev(argv);
+            }
         }
-        g_strfreev(argv);
+        //g_strfreev(argv);
     }
     free(line);
     return NULL;
@@ -97,6 +115,7 @@ static void* handle_cli_input(void* arg)
 
 int startCLI(void)
 {
+    commandstorun = g_async_queue_new();
     clitable = g_hash_table_new(g_str_hash, _frida_g_str_equal);
     Command* cmd = malloc(sizeof(Command));
     if (!cmd) return 0;
