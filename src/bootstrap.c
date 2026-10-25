@@ -17,13 +17,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <stdint.h>
+#include "cli.h"
 #include "engine.h"
-#include "frida-gum.h"
+#include <frida-gum.h>
 #include "hooks.h"
 #include "macro.h"
 
 static int initialize(void)
 {
+    if (!setupcli()) return 0;
     return 1;
 }
 
@@ -32,6 +34,7 @@ static void resetsafetynet(void)
 {
     resetGame_ft callback = resetTrampoline;
     callback();
+    gum_interceptor_revert(g_interceptor, resetGame);
     LOG("engine ready\n");
     if (!initialize()) ragequit;
 }
@@ -41,5 +44,5 @@ void bootstrapapi(uintptr_t base)
     setup38offsets(base);
     g_interceptor = gum_interceptor_obtain(); //we cache it globally to avoid reference leaks
     if (!g_interceptor) ragequit;
-    if (!gum_interceptor_replace(g_interceptor, resetGame, resetsafetynet, &resetTrampoline, NULL)) ragequit;
+    if (gum_interceptor_replace(g_interceptor, resetGame, resetsafetynet, &resetTrampoline, NULL) != GUM_REPLACE_OK) ragequit;
 }

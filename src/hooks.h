@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef HOOKS_H
 #define HOOKS_H
 
-#include "frida-gum.h"
+#include <frida-gum.h>
 extern GumInterceptor* g_interceptor;
 
 #endif
