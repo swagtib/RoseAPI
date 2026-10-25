@@ -16,27 +16,10 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef CLI_H
-#define CLI_H
-#include <frida-gum.h>
-#include <roseapi.h>
+#ifndef BOOTSTRAP_H
+#define BOOTSTRAP_H
 
-int startCLI(void);
-
-typedef struct {
-    char *name;
-    CLICallback callback;
-} Command;
-
-typedef struct {
-    Command* cmd;
-    int argc;
-    char **argv;
-    char *name;
-} ExecutedCommand;
-
-void removeclibyname(const char *name);
-extern GAsyncQueue* commandstorun;
-int clicommandexists(const char *name);
+#include <stdint.h>
+void bootstrapapi(uintptr_t base);
 
 #endif

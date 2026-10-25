@@ -17,10 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <frida-gum.h>
-#include "hooks.h"
 #include "macro.h"
-#include <unistd.h>
-#include "engine.h"
+#include "bootstrap.h"
 
 void __attribute__((constructor)) start()
 {
@@ -29,22 +27,14 @@ void __attribute__((constructor)) start()
     if (!module)
     {
         LOG_ERROR("failed obtaining module\n");
-        _exit(1);
+        ragequit;
     }
     const GumMemoryRange* range = gum_module_get_range(module);
     if (!range)
     {
         LOG_ERROR("failed obtaining range\n");
-        _exit(1);
+        ragequit;
     }
-    LOG("base addr %#lx\n", range->base_address);
-    interceptor = gum_interceptor_obtain();
-    if (!interceptor)
-    {
-        LOG_ERROR("failed to obtain interceptor\n");
-        _exit(1);
-    }
-    init_alpha_38f(range->base_address);
-    engine_safety_net();
-    return;    
+    LOG("base address: %#lx\n", range->base_address);
+    bootstrapapi(range->base_address);
 }

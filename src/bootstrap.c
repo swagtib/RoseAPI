@@ -16,21 +16,30 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef PLUGIN_H
-#define PLUGIN_H
-#include <roseapi.h>
+#include <stdint.h>
+#include "engine.h"
 #include "frida-gum.h"
+#include "hooks.h"
+#include "macro.h"
 
-typedef struct {
-    unsigned int ptype;
-    void* state;
-    GPtrArray* clicommands;
-} Plugin;
+static int initialize(void)
+{
+    return 1;
+}
 
-Plugin* constructplugin(void);
-void destructplugin(Plugin* ptr);
-void enableplugin(ARGSCLI);
-void disableplugin(ARGSCLI);
-int setupPlugins(void);
+static gpointer resetTrampoline;
+static void resetsafetynet(void)
+{
+    resetGame_ft callback = resetTrampoline;
+    callback();
+    LOG("engine ready\n");
+    if (!initialize()) ragequit;
+}
 
-#endif
+void bootstrapapi(uintptr_t base)
+{
+    setup38offsets(base);
+    g_interceptor = gum_interceptor_obtain(); //we cache it globally to avoid reference leaks
+    if (!g_interceptor) ragequit;
+    if (!gum_interceptor_replace(g_interceptor, resetGame, resetsafetynet, &resetTrampoline, NULL)) ragequit;
+}

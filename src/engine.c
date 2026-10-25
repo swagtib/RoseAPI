@@ -21,35 +21,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // Copyright (c) 2020 jdbool
 // See THIRD_PARTY_NOTICES
 
+// Now without the bootstrapping code!
+
 #include "engine.h"
 #include <stdint.h>
-#include "frida-gum.h"
-#include "macro.h"
-#include "hooks.h"
-#include "cli.h"
-#include "plugin/plugin.h"
-#include <unistd.h>
-
-static gpointer resetTramp;
-
-static void setupapi(void)
-{
-    if (!setuphooks() || !setupPlugins() || !startCLI()) _exit(1);
-}
-
-static void resetgameover(void)
-{
-    resetGame_ft tramp = resetTramp;
-    tramp();
-    gum_interceptor_revert(interceptor, resetGame);
-    LOG("engine is ready\n");
-    setupapi();
-}
-
-void engine_safety_net(void)
-{
-    gum_interceptor_replace(interceptor, resetGame, resetgameover, &resetTramp, NULL);
-}
 
 deleteBond_ft deleteBond;
 accountDeathTax_ft accountDeathTax;
@@ -144,24 +119,24 @@ serverReceive_ft serverReceive;
 float* gravity;
 unsigned int* subVersion;
 unsigned int* version;
-RigidBody* bodies;
-Connection* connections;
+struct RigidBody* bodies;
+struct Connection* connections;
 int* identifier;
-Account* accounts;
-VehicleType* vehicleTypes;
-Event* events;
-Item* items;
-Voice* voices;
-Human* humans;
+struct Account* accounts;
+struct VehicleType* vehicleTypes;
+struct Event* events;
+struct Item* items;
+struct Voice* voices;
+struct Human* humans;
 unsigned int* sunTime;
 unsigned int* numTrafficCars;
-Player* players;
+struct Player* players;
 unsigned int* serverPort;
 int* serverMaxBytesPerSecond;
 char* adminPassword;
 char* password;
-Vehicle* vehicles;
-Bond* bonds;
+struct Vehicle* vehicles;
+struct Bond* bonds;
 char* serverName;
 int* isPassworded;
 int* maxPlayers;
@@ -171,12 +146,12 @@ unsigned char* packet;
 int* isLevelLoaded;
 char* loadedMapName;
 unsigned int* numStreetIntersections;
-StreetIntersection* streetIntersections;
+struct StreetIntersection* streetIntersections;
 unsigned int* numStreets;
-Street* streets;
+struct Street* streets;
 unsigned int* numBuildings;
-Building* buildings;
-Bullet* bullets;
+struct Building* buildings;
+struct Bullet* bullets;
 int* gameType;
 char* mapName;
 int* Round_weekDay;
@@ -184,7 +159,7 @@ int* roundNumber;
 int* gameState;
 int* gameTimer;
 int* ticksSinceReset;
-Corporation* corporations;
+struct Corporation* corporations;
 int* Round_roundTime;
 int* Round_startCash;
 unsigned char* Round_weekly;
@@ -204,12 +179,12 @@ unsigned char* World_respawnTeam;
 unsigned int* numBullets;
 unsigned short* numEvents;
 unsigned int* numConnections;
-LineIntersectResult* lineIntersectResult;
-ItemType* itemTypes;
-TrafficCar* trafficCars;
+struct LineIntersectResult* lineIntersectResult;
+struct ItemType* itemTypes;
+struct TrafficCar* trafficCars;
 
 
-void init_alpha_38f(uintptr_t base) {
+void setup38offsets(uintptr_t base) {
     deleteBond = (deleteBond_ft)(base + 0x5550);
     accountDeathTax = (accountDeathTax_ft)(base + 0x5710);
     createEventBullet = (createEventBullet_ft)(base + 0x5760);
@@ -303,24 +278,24 @@ void init_alpha_38f(uintptr_t base) {
     gravity = (float*)(base + 0xD874C);
     subVersion = (unsigned int*)(base + 0x2E9F04);
     version = (unsigned int*)(base + 0x2E9F08);
-    bodies = (RigidBody*)(base + 0x4F1AE0);
-    connections = (Connection*)(base + 0x669B20);
+    bodies = (struct RigidBody*)(base + 0x4F1AE0);
+    connections = (struct Connection*)(base + 0x669B20);
     identifier = (int*)(base + 0x357FD00);
-    accounts = (Account*)(base + 0x357FD08);
-    vehicleTypes = (VehicleType*)(base + 0x4D03560);
-    events = (Event*)(base + 0x5EDCD80);
-    items = (Item*)(base + 0x8117920);
-    voices = (Voice*)(base + 0xAEBED80);
-    humans = (Human*)(base + 0xCEFE1C8);
+    accounts = (struct Account*)(base + 0x357FD08);
+    vehicleTypes = (struct VehicleType*)(base + 0x4D03560);
+    events = (struct Event*)(base + 0x5EDCD80);
+    items = (struct Item*)(base + 0x8117920);
+    voices = (struct Voice*)(base + 0xAEBED80);
+    humans = (struct Human*)(base + 0xCEFE1C8);
     sunTime = (unsigned int*)(base + 0xDFB21E0);
     numTrafficCars = (unsigned int*)(base + 0x15B253F8);
-    players = (Player*)(base + 0x15B35420);
+    players = (struct Player*)(base + 0x15B35420);
     serverPort = (unsigned int*)(base + 0x18DB02A0);
     serverMaxBytesPerSecond = (int*)(base + 0x18DB02A4);
     adminPassword = (char*)(base + 0x18DB06AC);
     password = (char*)(base + 0x18DB08AC);
-    vehicles = (Vehicle*)(base + 0x1CF42740);
-    bonds = (Bond*)(base + 0x24ADC1C0);
+    vehicles = (struct Vehicle*)(base + 0x1CF42740);
+    bonds = (struct Bond*)(base + 0x24ADC1C0);
     serverName = (char*)(base + 0x250EC1D4);
     isPassworded = (int*)(base + 0x250EC5F0);
     maxPlayers = (int*)(base + 0x250EC5F4);
@@ -330,12 +305,12 @@ void init_alpha_38f(uintptr_t base) {
     isLevelLoaded = (int*)(base + 0x39496120);
     loadedMapName = (char*)(base + 0x39496124);
     numStreetIntersections = (unsigned int*)(base + 0x3949617C);
-    streetIntersections = (StreetIntersection*)(base + 0x39496184);
+    streetIntersections = (struct StreetIntersection*)(base + 0x39496184);
     numStreets = (unsigned int*)(base + 0x394B8184);
-    streets = (Street*)(base + 0x394B8188);
+    streets = (struct Street*)(base + 0x394B8188);
     numBuildings = (unsigned int*)(base + 0x3958A314);
-    buildings = (Building*)(base + 0x3958A358);
-    bullets = (Bullet*)(base + 0x44835BC0);
+    buildings = (struct Building*)(base + 0x3958A358);
+    bullets = (struct Bullet*)(base + 0x44835BC0);
     gameType = (int*)(base + 0x44ECAACC);
     mapName = (char*)(base + 0x44ECAAD0);
     Round_weekDay = (int*)(base + 0x44ECACE4);
@@ -343,7 +318,7 @@ void init_alpha_38f(uintptr_t base) {
     gameState = (int*)(base + 0x44ECACEC);
     gameTimer = (int*)(base + 0x44ECACF4);
     ticksSinceReset = (int*)(base + 0x44ECAD54);
-    corporations = (Corporation*)(base + 0x44ECAD80);
+    corporations = (struct Corporation*)(base + 0x44ECAD80);
     Round_roundTime = (int*)(base + 0x44F855CC);
     Round_startCash = (int*)(base + 0x44F855D0);
     Round_weekly = (unsigned char*)(base + 0x44F855D4);
@@ -363,9 +338,7 @@ void init_alpha_38f(uintptr_t base) {
     numBullets = (unsigned int*)(base + 0x45E07380);
     numEvents = (unsigned short*)(base + 0x45E07384);
     numConnections = (unsigned int*)(base + 0x45ED7DA8);
-    lineIntersectResult = (LineIntersectResult*)(base + 0x569EF720);
-    itemTypes = (ItemType*)(base + 0x5A60D7C0);
-    trafficCars = (TrafficCar*)(base + 0x5A80BEA0);
-    
-    LOG("setup offsets\n");
+    lineIntersectResult = (struct LineIntersectResult*)(base + 0x569EF720);
+    itemTypes = (struct ItemType*)(base + 0x5A60D7C0);
+    trafficCars = (struct TrafficCar*)(base + 0x5A80BEA0);
 }

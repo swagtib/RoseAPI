@@ -19,6 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef MACRO_H
 #define MACRO_H
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #define STRINGIFY_HELPER(x) #x
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
 
@@ -30,8 +33,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define escapereset "\x1b[0m"
 #define roseapi escapeyellow escapebold "[RoseAPI] " escapereset escapebold
 
-#define LOG(text, ...) fprintf(stdout, roseapi text escapereset , ##__VA_ARGS__)
-#define LOG_ERROR(text, ...) fprintf(stderr, roseapi text escapereset , ##__VA_ARGS__)
+#define LOG(text, ...) fprintf(stdout, roseapi text escapereset, ##__VA_ARGS__)
+#define LOG_ERROR(text, ...) fprintf(stderr, roseapi text escapereset, ##__VA_ARGS__)
 
+#define ragequit exit(EXIT_FAILURE)
 
 #endif
