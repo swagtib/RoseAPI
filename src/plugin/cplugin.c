@@ -16,16 +16,19 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "macro.h"
 #include "plugin/plugin.h"
 #include <libtcc.h>
 #include "plugin/cplugin.h"
 #include <roseapi.h>
+#include <unistd.h>
 
 Plugin* loadCPlugin(const char *path)
 {
     TCCState* state = tcc_new();
     if (!state) return NULL;
     if (tcc_set_output_type(state, TCC_OUTPUT_MEMORY) == -1) goto cleanupstate;
+    if (tcc_add_include_path(state, "api") == -1) goto cleanupstate;
     if (tcc_add_file(state, path) == -1) goto cleanupstate;
     if (tcc_relocate(state) == -1) goto cleanupstate;
     void (*plugin_init)(PluginContext) = tcc_get_symbol(state, "plugin_init");

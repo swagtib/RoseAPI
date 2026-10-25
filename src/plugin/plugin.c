@@ -93,32 +93,35 @@ void enableplugin(ARGSCLI)
     g_strchomp(args[0]);
     if (g_hash_table_contains(plugins, args[0])) return;
     int status = loadplugin(args[0]);
-    if (!status)
+    if (status)
     {
-        LOG_ERROR("failed to load plugin '%s'\n", args[0]);
-    } else LOG("loaded plugin '%s'\n", args[0]);
-    FILE* file = fopen("disabledplugins.txt", "r");
-    if (!file) return;
-    FILE* temp = fopen("tmpdplg", "w");
-    if (!temp)
-    {
-        fclose(file);
-        return;
-    }
-    char *buffer = NULL;
-    size_t size = 0;
-    while (getline(&buffer, &size, file) != -1)
-    {
-        if (strstr(buffer, args[0]) == NULL)
+        LOG("loaded plugin '%s'\n", args[0]);
+        FILE* file = fopen("disabledplugins.txt", "r");
+        if (!file) return;
+        FILE* tmp = fopen("tmpdplg", "w");
+        if (!tmp)
         {
-            fputs(buffer, temp);
+            fclose(file);
+            return;
         }
+        char* buffer = NULL;
+        size_t size = 0;
+        while (getline(&buffer, &size, file) != -1)
+        {
+            buffer[strcspn(buffer, "\r\n")] = '\0';
+            if (buffer[0] == '\0') continue;
+            if (strcmp(buffer, args[0]) != 0) // maybe use strcmp?
+            {
+                fputs(buffer, tmp);
+                fputc('\n', tmp);
+            }
+        }
+        free(buffer);
+        fclose(tmp);
+        fclose(file);
+        remove("disabledplugins.txt");
+        rename("tmpdplg", "disabledplugins.txt");
     }
-    free(buffer);
-    fclose(temp);
-    fclose(file);
-    remove("disabledplugins.txt");
-    rename("tmpdplg", "disabledplugins.txt");
 }
 
 void disableplugin(ARGSCLI)
@@ -126,27 +129,34 @@ void disableplugin(ARGSCLI)
     if (argc < 1) return;
     g_strchomp(args[0]);
     if (!g_hash_table_contains(plugins, args[0])) return;
-    Plugin* plugin = g_hash_table_lookup(plugins, args[0]);
-    g_hash_table_remove(plugins, args[0]);
+    gpointer key;
+    gpointer value;
+    if (!g_hash_table_lookup_extended(plugins, args[0], &key, &value)) return;
+    Plugin* plugin = value;
+    g_hash_table_steal(plugins, key);
+    free(key);
     if (!plugin) return;
     destructplugin(plugin);
-    LOG("unloaded plugin '%s'\n", args[0]);
     FILE* file = fopen("disabledplugins.txt", "a+");
     if (!file) return;
     int found = 0;
-    char *buffer = NULL;
+    char *buf = NULL;
     size_t size = 0;
     rewind(file);
-    while (getline(&buffer, &size, file) != -1)
+    while (getline(&buf, &size, file) != -1)
     {
-        buffer[strcspn(buffer, "\r\n")] = '\0';
-        if (strcmp(buffer, args[0]) == 0)
+        g_strchomp(buf);
+        if (strcmp(buf, args[0]) == 0)
         {
             found = 1;
             break;
         }
     }
-    free(buffer);
+    free(buf);
+    if (!found)
+    {
+        fprintf(file, "%s\n", args[0]);
+    }
     fclose(file);
     return;
 }
@@ -155,44 +165,53 @@ int setupPlugins(void)
 {
     plugins = g_hash_table_new(g_str_hash, _frida_g_str_equal);
     FILE* file = fopen("disabledplugins.txt", "r");
+    char **disabled = NULL;
+    int count = 0;
     if (file)
     {
-        char **disabled = NULL;
-        int count = 0;
-        char *buffer = NULL;
+        char *buf = NULL;
         size_t size = 0;
-        while (getline(&buffer, &size, file) != -1)
+        while (getline(&buf, &size, file) != -1)
         {
-            buffer[strcspn(buffer, "\r\n")] = '\0';
-            char **temp = realloc(disabled, (count + 1) * sizeof(char *));
+            g_strchomp(buf);
+            char **temp = realloc(disabled,  (count + 1) * sizeof(void*));
             if (!temp) continue;
             disabled = temp;
-            disabled[count] = strdup(buffer);
+            disabled[count] = strdup(buf);
             count++;
         }
         fclose(file);
-        free(buffer);
-        DIR* dir = opendir("plugins");
-        if (dir)
+        free(buf);
+    }
+    DIR* dir = opendir("plugins");
+    if (dir)
+    {
+        struct dirent *entry;
+        while ((entry = readdir(dir)) != NULL)
         {
-            struct dirent *entry;
-            while ((entry = readdir(dir)) != NULL)
-            { 
-                if (entry->d_name[0] == '.') continue;
-                g_strchomp(entry->d_name);
-                int isdisabled = 0;
+            g_strchomp(entry->d_name);
+            if (entry->d_name[0] == '.') continue;
+            int isdisabled = 0;
+            if (disabled != NULL && count > 0)
+            {
                 for (int i = 0; i < count; i++)
                 {
-                    if (strcmp(entry->d_name, disabled[i]) == 0) isdisabled = 1;
-                }
-                if (!isdisabled)
-                {
-                    int status = loadplugin(entry->d_name);
-                    if (status) LOG("auto loaded '%s'\n", entry->d_name);
+                    if (disabled[i] != NULL)
+                    {
+                        if (strcmp(entry->d_name, disabled[i]) == 0) isdisabled = 1;    
+                    }
                 }
             }
-            closedir(dir);
+            if (!isdisabled)
+            {
+                int status = loadplugin(entry->d_name);
+                if (status) LOG("auto loaded '%s'\n", entry->d_name);
+            }
         }
+        closedir(dir);
+    }
+    if (disabled != NULL)
+    {
         for (int i = 0; i < count; i++)
         {
             if (disabled[i] != NULL)

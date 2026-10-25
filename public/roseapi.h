@@ -26,4 +26,1106 @@ typedef void* PluginContext;
 int addclicommand(PluginContext ctx, const char *command, CLICallback callback);
 int addhook(PluginContext ctx, const char* hookname, void* callback);
 
+#define C_PROLOGUE plugin_init(PluginContext ctx)
+
+/*
+very temporary v1.0 stuf
+*/
+
+typedef enum {
+    ACCOUNTS = 32768,
+    PLAYERS = 256,
+    HUMANS = 256,
+    ITEMTYPES = 46,
+    ITEMS = 1024,
+    VEHICLETYPES = 17,
+    VEHICLES = 512,
+    RIGIDBODIES = 8192,
+    BONDS = 16384
+    // todo: add all the other stuff
+} MaxNumber;
+
+typedef enum {
+    AUTO5,
+    AK47,
+    AK47MAG,
+    M16,
+    M16MAG,
+    MAGNUM,
+    MAGNUMMAG,
+    MP5,
+    MP5MAG,
+    UZI,
+    UZIMAG,
+    PISTOL,
+    PISTOLMAG,
+    GRENADE,
+    BANDAGE,
+    BRIEFCASE,
+    OPENBRIEFCASE,
+    CASH_ROUND,
+    CASH_WORLD,
+    BLACK_DISK,
+    GREEN_DISK,
+    BLUE_DISK,
+    WHITE_DISK,
+    GOLD_DISK,
+    RED_DISK,
+    CELL_PHONE,
+    WALKIE_TALKIE,
+    KEY,
+    DOOR,
+    NEWSPAPER,
+    BURGER,
+    DESK,
+    LAMP,
+    PAYPHONE,
+    MEMO,
+    SOCCER_BALL,
+    ROPE,
+    BOX,
+    PLANK,
+    COMPUTER,
+    ARCADE,
+    TABLE,
+    TABLETEST2,
+    CUBEWALL,
+    BOTTLE,
+    WATERMELON
+} ItemTypes;
+
+typedef enum {
+    CAR_ENGINE = 8,
+    TIRE_DRIFT = 10,
+    RICOCHET1 = 11,
+    RICOCHET2 = 12,
+    RICOCHET3 = 13,
+    RICOCHET4 = 14,
+    RICOCHET5 = 15,
+    RICOCHET6 = 16,
+    RICOCHET7 = 17,
+    RICOCHET8 = 18,
+    CAR_CRASH1 = 19,
+    CAR_CRASH2 = 20,
+    BULLET_HIT_BODY1 = 21,
+    BULLET_HIT_BODY2 = 22,
+    BULLET_HIT_METAL1 = 23,
+    BULLET_HIT_METAL2 = 24,
+    GLASS_BREAK = 25,
+    PHONE_RING = 27,
+    PHONE_BUTTON_0 = 28,
+    PHONE_BUTTON_1 = 29,
+    PHONE_BUTTON_2 = 30,
+    PHONE_BUTTON_3 = 31,
+    PHONE_BUTTON_4 = 32,
+    PHONE_BUTTON_5 = 33,
+    PHONE_BUTTON_6 = 34,
+    PHONE_BUTTON_7 = 35,
+    PHONE_BUTTON_8 = 36,
+    PHONE_BUTTON_9 = 37,
+    PHONE_BUSY_SIGNAL = 38,
+    MAGAZINE_LOAD = 39,
+    BULLET_SHELL_BOUNCE = 40,
+    GEAR_SHIFT = 41,
+    HELICOPTER_MOTOR = 42,
+    TRAIN1 = 43,
+    TRAIN2 = 44,
+    TRAIN3 = 45,
+    TRAIN4 = 46,
+    FACTORY_WHISTLE = 47,
+    EXPLOSION = 48,
+    COMPUTER_DIALUP = 49,
+    COMPUTER_DRIVE = 50,
+    AK47_FIRE1 = 71,
+    AK47_FIRE2 = 72,
+    AK47_FIRE3 = 73,
+    AK47_FIRE4 = 74,
+    AK47_FIRE5 = 75,
+    AK47_FIRE6 = 76,
+    M16_FIRE1 = 77,
+    M16_FIRE2 = 78,
+    M16_FIRE3 = 79,
+    M16_FIRE4 = 80,
+    M16_FIRE5 = 81,
+    M16_FIRE6 = 82,
+    MP5_FIRE1 = 83,
+    MP5_FIRE2 = 84,
+    MP5_FIRE3 = 85,
+    MP5_FIRE4 = 86,
+    MP5_FIRE5 = 87,
+    MP5_FIRE6 = 88,
+    UZI_FIRE1 = 89,
+    UZI_FIRE2 = 90,
+    UZI_FIRE3 = 91,
+    UZI_FIRE4 = 92,
+    UZI_FIRE5 = 93,
+    UZI_FIRE6 = 94,
+    PISTOL_FIRE1 = 95,
+    PISTOL_FIRE2 = 96,
+    PISTOL_FIRE3 = 97,
+    PISTOL_FIRE4 = 98,
+    PISTOL_FIRE5 = 99,
+    PISTOL_FIRE6 = 100
+} Sound;
+
+typedef enum {
+    AK47_BULLETTYPE,
+    M16_BULLETTYPE,
+    NINEMM_BULLETTYPE,
+    MAGNUM_BULLETTYPE
+} BulletTypes;
+
+typedef enum {
+    TOWNCAR,
+    TOWNCAR2,
+    METRO,
+    LIMO,
+    TURBO,
+    TURBOS,
+    BEAMER,
+    VAN,
+    VAN2,
+    MINIVAN,
+    TRUCK,
+    TRAILER,
+    HELICOPTER,
+    TRAIN,
+    UNKNOWN,
+    HATCHBACK,
+    TEST
+} VehicleTypes;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} Vector;
+
+typedef struct {
+    Vector xaxis;
+    Vector yaxis;
+    Vector zaxis;
+} RotMatrix;
+
+typedef struct {
+    int active;
+    int type;
+    int settled;
+    int linkedHumanOrItemID;
+    int linkedBoneID;
+    float mass;
+    Vector pos;
+    Vector vel;
+    Vector startVel;
+    RotMatrix rot;
+    RotMatrix rotVel;
+    Vector scale;
+    Vector scaleReciprocal;
+    float smallestScaleFactor;
+    char __unkpad70[28];
+} RigidBody;
+
+typedef struct {
+    int active;
+    int playerID;
+    int humanID;
+    int receivingItemID;
+    int transmittingItemID;
+    int __unk2;
+    int __unk3;
+    int __unk4;
+    float distance;
+    float volume;
+} EarShot;
+
+typedef struct {
+    unsigned int address;
+    unsigned int port;
+    int unusedConnectionFilter;
+    int __unk0;
+    int roundNumber;
+    int adminVisible;
+    int playerID;
+    int __unk1;
+    int bandwidth;
+    int timeoutTime;
+    char __unkpad0[36];
+    int numReceivedEvents;
+    char __unkpad1[12];
+    EarShot earShots[8];
+    char __unkpad2[0];
+    int spectatingHumanID;
+    char __unkpad3[130048];
+    Vector cameraPosition;
+    char __unkpad4[58420];
+} Connection;
+
+typedef struct {
+    int token_unused;
+    int token2_unused;
+    int subRosaID;
+    int phoneNumber;
+    long long steamID;
+    char name[32];
+    int nameChangeDelay_unused;
+    int money;
+    int corporateRating;
+    int criminalRating;
+    int spawnTimer;
+    int playTime;
+    int bestRaceLapTime;
+    int eyeColor_unused;
+    int hairColor_unused;
+    int skinColor_unused;
+    char __unkpad5[8];
+    int banTime;
+    int isAdmin;
+} Account;
+
+typedef struct {
+    int usesExternalModel;
+    int __unk0;
+    int controllableState;
+    char __unkpad50[8];
+    char name[32];
+    int price;
+    float mass;
+    char __unkpad51[96312];
+    float acceleration;
+    int numWheels;
+    char __unkpad52[3256];
+    Vector carBodyOffset;
+    char __unkpad53[128];
+} VehicleType;
+
+typedef struct {
+    int type;
+    int tickCreated;
+    Vector vectorA;
+    Vector vectorB;
+    int a;
+    int b;
+    int c;
+    int d;
+    float floatA;
+    float floatB;
+    int __unk0;
+    int __unk1;
+    char message[64];
+} Event;
+
+typedef struct {
+    int active;
+    int physicsSim;
+    int physicsSettled;
+    int physicsSettledTimer;
+    int isStatic;
+    int type;
+    float mass;
+    int despawnTime;
+    int grenadePrimerID;
+    int parentHumanID;
+    int parentItemID;
+    int parentSlot;
+    int isInPocket;
+    int numChildItems;
+    int childItemIDs[8];
+    int bodyID;
+    Vector pos;
+    Vector pos2;
+    Vector vel;
+    Vector vel2;
+    Vector vel3;
+    Vector vel4;
+    RotMatrix rot;
+    char __unkpad39[60];
+    Vector boundingBoxCornerA;
+    Vector boundingBoxCornerB;
+    char __unkpad40[28];
+    int health;
+    int cooldown;
+    int __unk3;
+    int bullets;
+    char __unkpad41[4];
+    int triggerTicks;
+    int inputFlags;
+    int lastInputFlags;
+    char __unkpad42[4];
+    int connectedPhoneID;
+    int phoneNumber;
+    int callerRingTimer;
+    int displayPhoneNumber;
+    int enteredPhoneNumber;
+    char __unkpad43[264];
+    int phoneTexture;
+    int phoneStatus;
+    int vehicleID;
+    char __unkpad44[28];
+    int cashSpread;
+    int cashBillAmount;
+    int cashPureValue;
+    char __unkpad45[188];
+    union {
+        unsigned int computerCurrentLine;
+        unsigned int memoText;
+        int team;
+    };
+    unsigned int computerTopLine;
+    int computerCursor;
+    char computerLines[32][64];
+    char __unkpad46[0];
+    unsigned char computerLineColors[32][64];
+    char __unkpad47[740];
+    int computerTeam;
+    int computerState;
+    char __unkpad48[4];
+    int computerMissionConnectTimer;
+    int computerMissionSubMenu;
+    char __unkpad49[1300];
+} Item;
+
+typedef struct {
+    int isSilenced;
+    int __unk0;
+    int volumeLevel;
+    int currentFrame;
+    int __unk1;
+    int frameVolumeLevels[64];
+    int frameSizes[64];
+    unsigned char frames[64][2048];
+} Voice;
+
+typedef struct {
+    int bodyID;
+    Vector pos;
+    Vector pos2;
+    Vector vel;
+    int __unk0;
+    int __unk1;
+    int __unk2;
+    RotMatrix rot;
+    char __unkpad20[44];
+    float mass;
+    Vector scaleReciprocal;
+    Vector scale;
+    char __unkpad21[152];
+} Bone;
+
+typedef struct {
+    int count;
+    int primaryItemID;
+    int secondaryItemID;
+    char __unkpad22[28];
+} InventorySlot;
+
+typedef struct {
+    int active;
+    int physicsSim;
+    int playerID;
+    int accountID;
+    int __unk1;
+    int __unk2;
+    int burgerEatCooldown;
+    int stamina;
+    int maxStamina;
+    int __unk4;
+    int vehicleID;
+    int vehicleSeat;
+    int lastVehicleID;
+    int lastVehicleCooldown;
+    unsigned int despawnTime;
+    int oldHealth;
+    int isImmortal;
+    int __unk10;
+    int __unk11;
+    int vehicleExitAnimTimer;
+    unsigned int spawnProtection;
+    int isOnGround;
+    int movementState;
+    int standingUpAnimTimer;
+    int zoomLevel;
+    int __unk14;
+    int __unk15;
+    int __unk16;
+    float throwPitch;
+    int __unk18;
+    int damage;
+    int isStanding;
+    Vector pos;
+    Vector pos2;
+    float viewYaw;
+    float viewPitch;
+    char __unkpad23[56];
+    float viewYaw2;
+    char __unkpad24[60];
+    float crouchHeight;
+    char __unkpad25[12];
+    float gearX;
+    float strafeInput;
+    float gearY;
+    float walkInput;
+    float viewYawVel;
+    float viewPitch2;
+    char __unkpad26[212];
+    unsigned int inputFlags;
+    unsigned int lastInputFlags;
+    char __unkpad27[4];
+    Bone bones[16];
+    char __unkpad28[21808];
+    InventorySlot inventorySlots[6];
+    char __unkpad29[400];
+    int health;
+    int bloodLevel;
+    int isBleeding;
+    int chestHP;
+    int __unk27;
+    int headHP;
+    int __unk28;
+    int leftArmHP;
+    int __unk29;
+    int rightArmHP;
+    int __unk30;
+    int leftLegHP;
+    int __unk31;
+    int rightLegHP;
+    char __unkpad30[84];
+    int progressBar;
+    int inventoryAnimationFlags;
+    float inventoryAnimationProgress;
+    int inventoryAnimationDuration;
+    int inventoryAnimationHand;
+    int inventoryAnimationSlot;
+    int inventoryAnimationCounterFinished;
+    int inventoryAnimationCounter;
+    char __unkpad31[388];
+    int gender;
+    int head;
+    int skinColor;
+    int hairColor;
+    int hair;
+    int eyeColor;
+    int model;
+    int suitColor;
+    int tieColor;
+    int sunglasses;
+    int necklace;
+    int lastUpdatedWantedGroup;
+    char __unkpad32[72];
+} Human;
+
+typedef struct {
+    int id;
+    char text[64];
+    int __unk;
+} MenuButton;
+
+typedef struct {
+    int type;
+    int a;
+    int b;
+    int c;
+    int d;
+    char text[64];
+} Action;
+
+typedef struct {
+    int active;
+    char name[32];
+    int token_unused;
+    int token2_unused;
+    unsigned int subRosaID;
+    unsigned int phoneNumber;
+    int isAdmin;
+    unsigned int adminAttempts;
+    unsigned int accountID;
+    int chatDelay;
+    char __unkpad6[4];
+    int isReady;
+    int money;
+    int teamMoney;
+    int budget;
+    int corporateRating;
+    int criminalRating;
+    int isGodMode;
+    int __unk3;
+    int itemsBought;
+    int vehiclesBought;
+    int withdrawnBills;
+    char __unkpad7[16];
+    unsigned int team;
+    unsigned int teamSwitchTimer;
+    int stocks;
+    int isRoundManager;
+    int __unk6;
+    int spawnTimer;
+    int humanID;
+    float gearX;
+    float leftRightInput;
+    float gearY;
+    float forwardBackInput;
+    float viewYawDelta;
+    float viewPitch;
+    float freeLookYaw;
+    float freeLookPitch;
+    float viewYaw;
+    char __unkpad8[32];
+    float viewPitchDelta;
+    char __unkpad9[56];
+    unsigned int inputFlags;
+    unsigned int lastInputFlags;
+    char __unkpad10[12];
+    int zoomLevel;
+    char __unkpad11[32];
+    int inputType;
+    int lastInputType;
+    char __unkpad12[4];
+    int menuTab;
+    int menuTabBuildingID;
+    char __unkpad13[72];
+    int numActions;
+    int lastNumActions;
+    char __unkpad14[12];
+    Action actions[64];
+    char __unkpad15[1100];
+    int numMenuButtons;
+    MenuButton menuButtons[32];
+    char __unkpad16[2304];
+    int isBot;
+    int isZombie;
+    char __unkpad17[24];
+    int botHasDestination;
+    Vector botDestination;
+    char __unkpad18[2660];
+    int gender;
+    int skinColor;
+    int hairColor;
+    int hair;
+    int eyeColor;
+    int model;
+    int suitColor;
+    int tieColor;
+    int sunglasses;
+    int head;
+    int necklace;
+    char __unkpad19[92];
+} Player;
+
+typedef struct {
+    int bodyID;
+    int __unk0;
+    int isPopped;
+    char __unkpad54[4];
+    int health;
+    char __unkpad55[28];
+    float mass;
+    float size;
+    char __unkpad56[8];
+    float spin;
+    char __unkpad57[44];
+    float visualHeight;
+    char __unkpad58[12];
+    float vehicleHeight;
+    float skid;
+    char __unkpad59[36];
+} Wheel;
+
+typedef struct {
+    int active;
+    unsigned int type;
+    int controllableState;
+    int health;
+    int __unk1;
+    int lastDriverPlayerID;
+    unsigned int color;
+    short despawnTime;
+    short spawnedState;
+    int isLocked;
+    int __unk3;
+    int bodyID;
+    Vector pos;
+    Vector pos2;
+    RotMatrix rot;
+    int __unk4;
+    Vector vel;
+    char __unkpad60[10116];
+    int windowStates[8];
+    char __unkpad61[3556];
+    float gearX;
+    float steerControl;
+    float gearY;
+    float gasControl;
+    char __unkpad62[56];
+    int trafficCarID;
+    char __unkpad63[596];
+    float acceleration;
+    char __unkpad64[140];
+    int engineRPM;
+    char __unkpad65[12];
+    int numWheels;
+    Wheel wheels[6];
+    char __unkpad66[4700];
+    int bladeBodyID;
+    char __unkpad67[304];
+    int numSeats;
+    char __unkpad68[136];
+} Vehicle;
+
+typedef struct {
+    int active;
+    int type;
+    int __unk0;
+    int despawnTime;
+    char __unkpad71[28];
+    Vector globalPos;
+    Vector localPos;
+    Vector otherLocalPos;
+    char __unkpad72[72];
+    int bodyID;
+    int otherBodyID;
+    char __unkpad73[84];
+} Bond;
+
+typedef struct {
+    int __unk0[3];
+    Vector pos;
+    int streetEast;
+    int streetSouth;
+    int streetWest;
+    int streetNorth;
+    char __unkpad75[28];
+    int lightsState;
+    int lightsTimer;
+    int lightsTimerMax;
+    int lightEast;
+    int lightSouth;
+    int lightWest;
+    int lightNorth;
+    char __unkpad76[40];
+} StreetIntersection;
+
+typedef struct {
+    int direction;
+    Vector posA;
+    Vector posB;
+} StreetLane;
+
+typedef struct {
+    char name[32];
+    int __unk0;
+    int intersectionA;
+    int intersectionB;
+    int __unk1[3];
+    int numLanes;
+    StreetLane lanes[16];
+    float __unk2[6];
+    Vector trafficCuboidA;
+    Vector trafficCuboidB;
+    int numTraffic;
+    char __unkpad74[1024];
+} Street;
+
+typedef struct {
+    int type;
+    int price;
+    int color;
+} ShopCar;
+
+typedef struct {
+    int type;
+    int __unk0[3];
+    Vector pos;
+    RotMatrix spawnRot;
+    Vector interiorCuboidA;
+    Vector interiorCuboidB;
+    char __unkpad80[51612];
+    int numShopCars;
+    ShopCar shopCars[16];
+    int shopCarSales;
+    char __unkpad81[4176];
+} Building;
+
+typedef struct {
+    unsigned int type;
+    int time;
+    int playerID;
+    float __unk0;
+    float __unk1;
+    Vector lastPos;
+    Vector pos;
+    Vector vel;
+    char __unkpad69[36];
+} Bullet;
+
+typedef struct {
+    int active;
+    char __unkpad82[8];
+    int type;
+    int itemID;
+    char __unkpad83[8];
+    int team1ID;
+    int team2ID;
+    char __unkpad84[24];
+    int diskTypeID;
+    int value;
+    unsigned int sunTime;
+    int location;
+    int providedCash;
+    char __unkpad85[1036];
+} Mission;
+
+typedef struct {
+    Vector interiorCuboidA;
+    Vector interiorCuboidB;
+    Vector vaultCuboidA;
+    Vector vaultCuboidB;
+    float tableOrientation;
+    Vector tableLocation;
+    Vector spawnLocation;
+    char __unkpad86[8];
+    int players;
+    char __unkpad87[8];
+    int isDoorOpen;
+    int managerPlayerID;
+    char __unkpad88[276];
+    Vector doorPos;
+    char __unkpad89[20];
+    Mission missions[16];
+    char __unkpad90[1124];
+    Vector carSpawn1;
+    RotMatrix __unk0;
+    char __unkpad91[4052];
+} Corporation;
+
+typedef struct LineIntersectResult {
+    Vector pos;
+    Vector normal;
+    float fraction;
+    float __unk0;
+    int __unk1;
+    int __unk2;
+    int __unk3;
+    int __unk4;
+    int vehicleFace;
+    int humanBone;
+    int __unk6;
+    int __unk7;
+    int __unk8;
+    int __unk9;
+    int __unk10;
+    int __unk11;
+    int __unk12;
+    int areaId;
+    int blockX;
+    int blockY;
+    int blockZ;
+    int __unk17;
+    int __unk18;
+    int matMaybe;
+    int __unk20;
+    int __unk21;
+    int __unk22;
+    int __unk23;
+    int __unk24;
+    int __unk25;
+    int __unk26;
+    int __unk27;
+} LineIntersectResult;
+
+typedef struct {
+    int __unk0;
+    int price;
+    float mass;
+    int canCollide;
+    int isGun;
+    int isOneHanded;
+    int fireRate;
+    int bulletType;
+    int __unk2;
+    int magazineAmmo;
+    float bulletVelocity;
+    float bulletSpread;
+    char name[64];
+    char __unkpad33[12];
+    int numHands;
+    Vector rightHandPos;
+    Vector leftHandPos;
+    char __unkpad34[24];
+    Vector primaryGripRotAxis;
+    float primaryGripRotation;
+    Vector secondaryGripRotAxis;
+    float secondaryGripRotation;
+    char __unkpad35[52];
+    Vector boundsCenter;
+    char __unkpad36[12];
+    int canMountTo[46];
+    char __unkpad37[4544];
+    Vector gunHoldingPos;
+    char __unkpad38[48];
+} ItemType;
+
+typedef struct {
+    int type;
+    int humanID;
+    int vehicleID;
+    int state;
+    Vector pos;
+    Vector vel;
+    float yaw;
+    RotMatrix rot;
+    char __unkpad77[44];
+    int isBot;
+    int isAggressive;
+    char __unkpad78[1364];
+    int color;
+    char __unkpad79[32];
+} TrafficCar;
+
+typedef void (*deleteBond_ft)(int id);
+typedef void (*accountDeathTax_ft)(int id);
+typedef void (*createEventBullet_ft)(int bulletType, Vector * pos, Vector * vel, int itemID);
+typedef void (*createEventBulletHit_ft)(int __unk, int hitType, Vector * pos, Vector * normal);
+typedef void (*createEventMessage_ft)(int type, char * message, int speakerID, int distance);
+typedef void (*createEventCreateVehicle_ft)(int id);
+typedef void (*createEventUpdateVehicle_ft)(int vehicleID, int updateType, int partID, Vector * pos, Vector * hitVelocity);
+typedef void (*createEventUpdateItemInfo_ft)(int id);
+typedef void (*createEventUpdatePlayer_ft)(int id);
+typedef void (*createEventUpdatePlayerFinance_ft)(int id);
+typedef void (*playerDeathTax_ft)(int id);
+typedef void (*createEventSound_ft)(int soundType, Vector * pos, float volume, float pitch);
+typedef void (*createEventSoundItem_ft)(unsigned int soundType, int itemID, float volume, float pitch);
+typedef void (*createEventUpdateCorpDoorState_ft)(int corpID, int state);
+typedef void (*createEventUpdateCorpMission_ft)(int corpID, int missionID);
+typedef void (*createEventUpdateElimState_ft)(int playerID, int trackerVisible, int playerTeam, int saviorPlayerID, Vector * saviorPos);
+typedef void (*createEventExplosion_ft)(int type, Vector * pos);
+typedef void (*playerGiveWantedLevel_ft)(int playerID, int victimPlayerID, int basePoints);
+typedef void (*deleteHuman_ft)(int id);
+typedef void (*deleteVehicle_ft)(int id);
+typedef int (*lineIntersectTriangle_ft)(Vector * outPos, Vector * normal, float * outFraction, Vector * posA, Vector * posB, Vector * triA, Vector * triB, Vector * triC);
+typedef int (*createAccountByJoinTicket_ft)(int identifier, unsigned int ticket);
+typedef void (*saveAccountsServer_ft)(void);
+typedef void (*aiTrafficCarDestination_ft)(int id, int a, int b, int c, int d);
+typedef void (*aiTrafficCar_ft)(int id);
+typedef int (*areaGetBlock_ft)(int zero, int blockX, int blockY, int blockZ);
+typedef int (*areaDeleteBlock_ft)(int zero, int blockX, int blockY, int blockZ);
+typedef int (*areaCreateBlock_ft)(int zero, int blockX, int blockY, int blockZ, unsigned int flags, short * __unk);
+typedef int (*createBondRigidBodyToLevel_ft)(int bodyID, Vector * localPos, Vector * globalPos);
+typedef int (*createBondRigidBodyToRigidBody_ft)(int aBodyID, int bBodyID, Vector * aLocalPos, Vector * bLocalPos);
+typedef int (*createBondRigidBodyRotRigidBody_ft)(int aBodyID, int bBodyID);
+typedef void (*addCollisionRigidBodyOnRigidBody_ft)(int aBodyID, int bBodyID, Vector * aLocalPos, Vector * bLocalPos, Vector * normal, float arg6, float arg7, float arg8, float arg9);
+typedef void (*addCollisionRigidBodyOnLevel_ft)(int bodyID, Vector * localPos, Vector * normal, float arg4, float arg5, float arg6, float arg7);
+typedef int (*createBullet_ft)(int type, Vector * pos, Vector * vel, int playerID);
+typedef void (*bulletTimeToLive_ft)(void);
+typedef void (*economyCarMarket_ft)(void);
+typedef void (*humanApplyDamage_ft)(int humanID, int bone, int __unk, int damage);
+typedef int (*lineIntersectHuman_ft)(int humanID, Vector * posA, Vector * posB, float padding);
+typedef int (*itemCashGetBillValue_ft)(int itemID);
+typedef int (*itemCashAddBill_ft)(int itemID, int zero, int amount);
+typedef void (*itemCashRemoveBill_ft)(int itemID, int amount);
+typedef int (*itemSetMemo_ft)(int itemID, char * memo);
+typedef int (*itemComputerTransmitLine_ft)(int itemID, unsigned int line);
+typedef void (*itemComputerIncrementLine_ft)(int id);
+typedef void (*grenadeExplosion_ft)(int id);
+typedef int (*linkItem_ft)(int itemID, int childItemID, int parentHumanID, int slot);
+typedef void (*deleteItem_ft)(int id);
+typedef void (*itemWeaponSimulation_ft)(int id);
+typedef void (*vehicleApplyDamage_ft)(int vehicleID, int damage);
+typedef void (*vehicleSimulateSuspensions_ft)(void);
+typedef void (*humanCollisionVehicle_ft)(int humanID, int vehicleID);
+typedef int (*lineIntersectVehicle_ft)(int vehicleID, Vector * posA, Vector * posB, int includeWheels);
+typedef int (*createPlayer_ft)(void);
+typedef void (*deletePlayer_ft)(int id);
+typedef void (*prepareObjectPacket_ft)(void);
+typedef void (*humanLimbInverseKinematics_ft)(int arg1, int arg2, int arg3, Vector * arg4, RotMatrix * arg5, Vector * arg6, float arg7, float arg8, float arg9, float * arg10, Vector * arg11, Vector * arg12, Vector * arg13, char arg14);
+typedef int (*createRigidBody_ft)(int type, Vector * pos, RotMatrix * rot, Vector * vel, float mass, Vector * scale);
+typedef int (*createHuman_ft)(Vector * pos, RotMatrix * rot, int playerID);
+typedef int (*createItem_ft)(int type, Vector * pos, Vector * vel, RotMatrix * rot);
+typedef int (*itemComputerInput_ft)(int itemID, unsigned int character);
+typedef int (*createRope_ft)(Vector * pos, RotMatrix * rot);
+typedef void (*scenarioArmHuman_ft)(int human, int weapon, int magCount);
+typedef int (*createVehicle_ft)(int type, Vector * pos, Vector * vel, RotMatrix * rot, int color);
+typedef void (*rigidBodySimulation_ft)(void);
+typedef int (*lineIntersectLevel_ft)(Vector * posA, Vector * posB, int includeCityObjects);
+typedef void (*playerAI_ft)(int id);
+typedef void (*bulletSimulation_ft)(void);
+typedef void (*createTraffic_ft)(int amount);
+typedef void (*trafficSimulation_ft)(void);
+typedef void (*physicsSimulation_ft)(void);
+typedef void (*levelGenerateRaceTrack_ft)(void);
+typedef void (*levelGenerateTrainRaceTrack_ft)(void);
+typedef void (*calculatePlayerVoice_ft)(int connectionID, int playerID);
+typedef int (*serverPlayerMessage_ft)(int playerID, char * message);
+typedef void (*logicPlayerActions_ft)(int id);
+typedef void (*resetGame_ft)(void);
+typedef void (*logicSimulationCoop_ft)(void);
+typedef void (*logicSimulationRace_ft)(void);
+typedef void (*logicSimulationRound_ft)(void);
+typedef void (*logicSimulationTerminator_ft)(void);
+typedef void (*logicSimulationVersus_ft)(void);
+typedef void (*logicSimulationWorld_ft)(void);
+typedef void (*logicSimulation_ft)(void);
+typedef int (*packetReceive_ft)(void);
+typedef int (*sendPacket_ft)(unsigned int address, unsigned short port);
+typedef int (*packetWrite_ft)(void * source, int elementSize, int elementCount);
+typedef void (*serverSendConnectResponse_ft)(unsigned int address, unsigned int port, int __unk, char * message);
+typedef void (*serverSend_ft)(void);
+typedef int (*serverReceive_ft)(void);
+
+extern deleteBond_ft deleteBond;
+extern accountDeathTax_ft accountDeathTax;
+extern createEventBullet_ft createEventBullet;
+extern createEventBulletHit_ft createEventBulletHit;
+extern createEventMessage_ft createEventMessage;
+extern createEventCreateVehicle_ft createEventCreateVehicle;
+extern createEventUpdateVehicle_ft createEventUpdateVehicle;
+extern createEventUpdateItemInfo_ft createEventUpdateItemInfo;
+extern createEventUpdatePlayer_ft createEventUpdatePlayer;
+extern createEventUpdatePlayerFinance_ft createEventUpdatePlayerFinance;
+extern playerDeathTax_ft playerDeathTax;
+extern createEventSound_ft createEventSound;
+extern createEventSoundItem_ft createEventSoundItem;
+extern createEventUpdateCorpDoorState_ft createEventUpdateCorpDoorState;
+extern createEventUpdateCorpMission_ft createEventUpdateCorpMission;
+extern createEventUpdateElimState_ft createEventUpdateElimState;
+extern createEventExplosion_ft createEventExplosion;
+extern playerGiveWantedLevel_ft playerGiveWantedLevel;
+extern deleteHuman_ft deleteHuman;
+extern deleteVehicle_ft deleteVehicle;
+extern lineIntersectTriangle_ft lineIntersectTriangle;
+extern createAccountByJoinTicket_ft createAccountByJoinTicket;
+extern saveAccountsServer_ft saveAccountsServer;
+extern aiTrafficCarDestination_ft aiTrafficCarDestination;
+extern aiTrafficCar_ft aiTrafficCar;
+extern areaGetBlock_ft areaGetBlock;
+extern areaDeleteBlock_ft areaDeleteBlock;
+extern areaCreateBlock_ft areaCreateBlock;
+extern createBondRigidBodyToLevel_ft createBondRigidBodyToLevel;
+extern createBondRigidBodyToRigidBody_ft createBondRigidBodyToRigidBody;
+extern createBondRigidBodyRotRigidBody_ft createBondRigidBodyRotRigidBody;
+extern addCollisionRigidBodyOnRigidBody_ft addCollisionRigidBodyOnRigidBody;
+extern addCollisionRigidBodyOnLevel_ft addCollisionRigidBodyOnLevel;
+extern createBullet_ft createBullet;
+extern bulletTimeToLive_ft bulletTimeToLive;
+extern economyCarMarket_ft economyCarMarket;
+extern humanApplyDamage_ft humanApplyDamage;
+extern lineIntersectHuman_ft lineIntersectHuman;
+extern itemCashGetBillValue_ft itemCashGetBillValue;
+extern itemCashAddBill_ft itemCashAddBill;
+extern itemCashRemoveBill_ft itemCashRemoveBill;
+extern itemSetMemo_ft itemSetMemo;
+extern itemComputerTransmitLine_ft itemComputerTransmitLine;
+extern itemComputerIncrementLine_ft itemComputerIncrementLine;
+extern grenadeExplosion_ft grenadeExplosion;
+extern linkItem_ft linkItem;
+extern deleteItem_ft deleteItem;
+extern itemWeaponSimulation_ft itemWeaponSimulation;
+extern vehicleApplyDamage_ft vehicleApplyDamage;
+extern vehicleSimulateSuspensions_ft vehicleSimulateSuspensions;
+extern humanCollisionVehicle_ft humanCollisionVehicle;
+extern lineIntersectVehicle_ft lineIntersectVehicle;
+extern createPlayer_ft createPlayer;
+extern deletePlayer_ft deletePlayer;
+extern prepareObjectPacket_ft prepareObjectPacket;
+extern humanLimbInverseKinematics_ft humanLimbInverseKinematics;
+extern createRigidBody_ft createRigidBody;
+extern createHuman_ft createHuman;
+extern createItem_ft createItem;
+extern itemComputerInput_ft itemComputerInput;
+extern createRope_ft createRope;
+extern scenarioArmHuman_ft scenarioArmHuman;
+extern createVehicle_ft createVehicle;
+extern rigidBodySimulation_ft rigidBodySimulation;
+extern lineIntersectLevel_ft lineIntersectLevel;
+extern playerAI_ft playerAI;
+extern bulletSimulation_ft bulletSimulation;
+extern createTraffic_ft createTraffic;
+extern trafficSimulation_ft trafficSimulation;
+extern physicsSimulation_ft physicsSimulation;
+extern levelGenerateRaceTrack_ft levelGenerateRaceTrack;
+extern levelGenerateTrainRaceTrack_ft levelGenerateTrainRaceTrack;
+extern calculatePlayerVoice_ft calculatePlayerVoice;
+extern serverPlayerMessage_ft serverPlayerMessage;
+extern logicPlayerActions_ft logicPlayerActions;
+extern resetGame_ft resetGame;
+extern logicSimulationCoop_ft logicSimulationCoop;
+extern logicSimulationRace_ft logicSimulationRace;
+extern logicSimulationRound_ft logicSimulationRound;
+extern logicSimulationTerminator_ft logicSimulationTerminator;
+extern logicSimulationVersus_ft logicSimulationVersus;
+extern logicSimulationWorld_ft logicSimulationWorld;
+extern logicSimulation_ft logicSimulation;
+extern packetReceive_ft packetReceive;
+extern sendPacket_ft sendPacket;
+extern packetWrite_ft packetWrite;
+extern serverSendConnectResponse_ft serverSendConnectResponse;
+extern serverSend_ft serverSend;
+extern serverReceive_ft serverReceive;
+
+
+extern float* gravity;
+extern unsigned int* subVersion;
+extern unsigned int* version;
+extern RigidBody* bodies;
+extern Connection* connections;
+extern int* identifier;
+extern Account* accounts;
+extern VehicleType* vehicleTypes;
+extern Event* events;
+extern Item* items;
+extern Voice* voices;
+extern Human* humans;
+extern unsigned int* sunTime;
+extern unsigned int* numTrafficCars;
+extern Player* players;
+extern unsigned int* serverPort;
+extern int* serverMaxBytesPerSecond;
+extern char* adminPassword;
+extern char* password;
+extern Vehicle* vehicles;
+extern Bond* bonds;
+extern char* serverName;
+extern int* isPassworded;
+extern int* maxPlayers;
+extern int* serverSocketEnabled;
+extern int* packetSize;
+extern unsigned char* packet;
+extern int* isLevelLoaded;
+extern char* loadedMapName;
+extern unsigned int* numStreetIntersections;
+extern StreetIntersection* streetIntersections;
+extern unsigned int* numStreets;
+extern Street* streets;
+extern unsigned int* numBuildings;
+extern Building* buildings;
+extern Bullet* bullets;
+extern int* gameType;
+extern char* mapName;
+extern int* Round_weekDay;
+extern int* roundNumber;
+extern int* gameState;
+extern int* gameTimer;
+extern int* ticksSinceReset;
+extern Corporation* corporations;
+extern int* Round_roundTime;
+extern int* Round_startCash;
+extern unsigned char* Round_weekly;
+extern unsigned char* Round_bonusRatio;
+extern int* Round_teamDamage;
+extern int* World_traffic;
+extern int* World_Crime_civCiv;
+extern int* World_Crime_civTeam;
+extern int* World_Crime_teamCiv;
+extern int* World_Crime_teamTeam;
+extern int* World_Crime_teamTeamInBase;
+extern int* World_Crime_noSpawn;
+extern int* World_startCash;
+extern int* World_minCash;
+extern unsigned char* World_showJoinExit;
+extern unsigned char* World_respawnTeam;
+extern unsigned int* numBullets;
+extern unsigned short* numEvents;
+extern unsigned int* numConnections;
+extern LineIntersectResult* lineIntersectResult;
+extern ItemType* itemTypes;
+extern TrafficCar* trafficCars;
+
 #endif

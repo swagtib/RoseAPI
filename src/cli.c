@@ -99,7 +99,7 @@ static void* handle_cli_input(void* arg)
                 torun->cmd = cmd;
                 torun->argc = argc;
                 torun->argv = argv;
-                //torun->name = strdup(cmd->name);
+                torun->name = strdup(cmd->name);
                 g_async_queue_push(commandstorun, torun);
             } else
             {
