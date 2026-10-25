@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "plugin/plugin.h"
 #include <libtcc.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -105,7 +106,8 @@ void enableplugin(ARGSCLI)
         return;
     }
     char *buffer = NULL;
-    while (getline(&buffer, 0x0, file) != -1)
+    size_t size = 0;
+    while (getline(&buffer, &size, file) != -1)
     {
         if (strstr(buffer, args[0]) == NULL)
         {
@@ -133,8 +135,9 @@ void disableplugin(ARGSCLI)
     if (!file) return;
     int found = 0;
     char *buffer = NULL;
+    size_t size = 0;
     rewind(file);
-    while (getline(&buffer, 0x0, file) != -1)
+    while (getline(&buffer, &size, file) != -1)
     {
         buffer[strcspn(buffer, "\r\n")] = '\0';
         if (strcmp(buffer, args[0]) == 0)
@@ -157,7 +160,8 @@ int setupPlugins(void)
         char **disabled = NULL;
         int count = 0;
         char *buffer = NULL;
-        while (getline(&buffer, 0x0, file) != -1)
+        size_t size = 0;
+        while (getline(&buffer, &size, file) != -1)
         {
             buffer[strcspn(buffer, "\r\n")] = '\0';
             char **temp = realloc(disabled, (count + 1) * sizeof(char *));
