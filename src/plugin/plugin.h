@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define PLUGIN_H
 
 #include "roseapi.h"
-typedef void (*PluginEntry)(void);
+typedef void (*PluginEntry)(PluginContext);
 
 typedef struct {
     unsigned int ptype;

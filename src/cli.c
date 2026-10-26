@@ -17,13 +17,44 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "cli.h"
+#include "macro.h"
 #include "plugin/plugin.h"
+#include "roseapi.h"
 #include <pthread.h>
 #include <frida-gum.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-static GHashTable* commands;
+GHashTable* commands;
+
+int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
+{
+    if (!ctx || !name || !callback) return 0;
+    char *key = strdup(name);
+    if (!key) return 0;
+    g_strchomp(key);
+    if (strchr(key, ' ') != NULL)
+    {
+        free(key);
+        return 0;
+    }
+    if (g_hash_table_contains(commands, name))
+    {
+        LOG_ERROR("command '%s' is already registered\n", key);
+        free(key);
+        return 0;
+    }
+    Command* cmd = malloc(sizeof(Command));
+    if (!cmd)
+    {
+        free(key);
+        return 0;
+    }
+    cmd->callback = callback;
+    cmd->owner = ctx;
+    g_hash_table_insert(commands, key, cmd);
+    return 1;
+}
 
 static void* handle_cli(void* arg)
 {

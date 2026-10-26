@@ -21,5 +21,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 typedef void (*CLICallback)(int argc, char **args);
 #define ARGSCLI int argc, char **args
+typedef void* PluginContext;
+#define C_PROLOGUE void plugin_init(PluginContext ctx)
+int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
+
 
 #endif

@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "plugin/plugin.h"
+#include "cli.h"
 #include "roseapi.h"
 #include <frida-gum.h>
 #include <libtcc.h>
@@ -26,7 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <string.h>
 #include "macro.h"
 
-static GHashTable* plugins;
+GHashTable* plugins;
 
 Plugin* constructplugin(void)
 {
@@ -48,6 +49,18 @@ void destructplugin(void* ptr) // g_hash_table_new_full's value destruct functio
             tcc_delete(plugin->state);
         }
     }
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, commands);
+    while (g_hash_table_iter_next(&iter, &key, &value))
+    {
+        Command* cmd = value;
+        if (cmd->owner == ptr)
+        {
+            g_hash_table_iter_remove(&iter);
+        }
+    }
+
     free(plugin);
     return;
 }
@@ -97,7 +110,7 @@ static int loadplugin(const char *name)
         return 0;
     }
     g_hash_table_insert(plugins, key, plugin);
-    plugin->entry();
+    plugin->entry(plugin);
     return 1;
 }
 
