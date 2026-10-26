@@ -30,7 +30,7 @@ CREATE_TRAMPOLINE(Logic);
 static void GET_CALLBACK(Logic)(void)
 {
     ExecutedCommand* exec;
-    while ((exec = g_async_queue_pop(executedcmd)) != NULL)
+    while ((exec = g_async_queue_try_pop(executedcmd)) != NULL)
     {
         if (g_hash_table_contains(commands, exec->name))
         {

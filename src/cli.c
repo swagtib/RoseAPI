@@ -39,7 +39,7 @@ int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
         free(key);
         return 0;
     }
-    if (g_hash_table_contains(commands, name))
+    if (g_hash_table_contains(commands, key))
     {
         LOG_ERROR("command '%s' is already registered\n", key);
         free(key);
