@@ -24,6 +24,7 @@ typedef void (*CLICallback)(int argc, char **args);
 typedef void* PluginContext;
 #define C_PROLOGUE void plugin_init(PluginContext ctx)
 int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
+extern unsigned int veto_hook;
 
 
 #endif

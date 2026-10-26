@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdlib.h>
 
 GHashTable* commands;
+GAsyncQueue* executedcmd;
 
 int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
 {
@@ -71,6 +72,22 @@ static void* handle_cli(void* arg)
         if (!g_shell_parse_argv(line, &argc, &argv, NULL)) continue;
         if (argc > 0 && g_hash_table_contains(commands, argv[0]))
         {
+            ExecutedCommand* cmd = malloc(sizeof(ExecutedCommand));
+            if (!cmd)
+            {
+                g_strfreev(argv);
+                continue;
+            }
+            cmd->argc = argc;
+            cmd->argv = argv;
+            cmd->name = strdup(argv[0]);
+            if (!cmd->name)
+            {
+                g_strfreev(argv);
+                free(cmd);
+                continue;
+            }
+            g_async_queue_push(executedcmd, cmd);
         } else {
             g_strfreev(argv);
         }
@@ -82,8 +99,8 @@ static void* handle_cli(void* arg)
 int setupcli(void)
 {
     commands = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, free, free);
+    executedcmd = g_async_queue_new();
     pthread_t thread;
-
     Command* enable = malloc(sizeof(Command));
     Command* disable = malloc(sizeof(Command));
     if (!enable || !disable) return 0;

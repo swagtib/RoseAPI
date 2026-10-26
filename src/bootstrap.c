@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 static int initialize(void)
 {
-    if (!setupPlugins() || !setupcli()) return 0;
+    if (!setupHooks() || !setupPlugins() || !setupcli()) return 0;
     return 1;
 }
 

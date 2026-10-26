@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 int setupcli(void);
 
-GHashTable* commands;
+extern GHashTable* commands;
 
 typedef struct {
     CLICallback callback;
@@ -37,5 +37,7 @@ typedef struct {
     char **argv;
     int argc;
 } ExecutedCommand;
+
+extern GAsyncQueue* executedcmd;
 
 #endif
