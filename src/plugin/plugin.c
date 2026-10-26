@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "plugin/plugin.h"
 #include "cli.h"
-#include "hooks.h"
 #include "roseapi.h"
 #include <frida-gum.h>
 #include <libtcc.h>
@@ -60,28 +59,6 @@ void destructplugin(void* ptr) // g_hash_table_new_full's value destruct functio
         {
             g_hash_table_iter_remove(&iter);
         }
-    }
-    g_hash_table_iter_init(&iter, hooks);
-    while (g_hash_table_iter_next(&iter, &key, &value))
-    {
-        GSList* hooklist = value;
-        GSList* entry = hooklist;
-        while (entry != NULL)
-        {
-            GSList* next = entry->next;
-            Hook* hook = entry->data;
-            if (hook)
-            {
-                if (hook->owner == plugin)
-                {
-                    free(hook);
-                    hook = NULL;
-                    hooklist = g_slist_delete_link(hooklist, entry);
-                }
-            }
-            entry = next;
-        }
-        g_hash_table_iter_replace(&iter, hooklist);
     }
     free(plugin);
     return;
@@ -208,5 +185,68 @@ void disableplugin(ARGSCLI)
 int setupPlugins(void)
 {
     plugins = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, free, destructplugin);
+    char **disabled = NULL;
+    int count = 0;
+    FILE* file = fopen("disabledplugins.txt", "r");
+    if (file)
+    {
+        char *buf = NULL;
+        size_t size = 0;
+        while (getline(&buf, &size, file) != -1)
+        {
+            g_strchomp(buf);
+            char *str = strdup(buf);
+            if (!str) continue;
+            char **temp = realloc(disabled, (count + 1) * sizeof(char *));
+            if (!temp)
+            {
+                free(str);
+                continue;
+            }
+            disabled = temp;
+            disabled[count] = str;
+            count++;
+        }
+        fclose(file);
+        free(buf);
+    }
+    DIR* dir = opendir("plugins");
+    if (dir)
+    {
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != NULL)
+        {
+            if (entry->d_name[0] == '.') continue;
+            int isdisabled = 0;
+            if (disabled && count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    if (strcmp(entry->d_name, disabled[i]) == 0)
+                    {
+                        isdisabled = 1;
+                        break;
+                    }
+                }
+            }
+            if (!isdisabled)
+            {
+                int status = loadplugin(entry->d_name);
+                if (status)
+                {
+                    LOG("auto loaded '%s'\n", entry->d_name);
+                }
+            }
+        }
+        closedir(dir);
+    }
+    if (disabled)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (disabled[i]) free(disabled[i]);
+        }
+        free(disabled);
+    }
     return 1;
 }

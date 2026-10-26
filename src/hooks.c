@@ -17,42 +17,38 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <frida-gum.h>
-#include <stdlib.h>
 #include "hooks.h"
-#include "cli.h"
-#include "engine.h"
 
 GumInterceptor* g_interceptor = NULL;
-GHashTable* hooks = NULL;
-unsigned int veto_hook = 0;
+Hook hooks[HOOK_COUNT];
 
-CREATE_TRAMPOLINE(Logic);
-static void GET_CALLBACK(Logic)(void)
+static HookScope* current_scope = NULL;
+
+static void createscope(HookScope *scope, int hookidx)
 {
-    ExecutedCommand* exec;
-    while ((exec = g_async_queue_try_pop(executedcmd)) != NULL)
-    {
-        if (g_hash_table_contains(commands, exec->name))
-        {
-            Command* cmd = g_hash_table_lookup(commands, exec->name);
-            cmd->callback(exec->argc - 1, &exec->argv[1]);
-        }
-        free(exec->name);
-        g_strfreev(exec->argv);
-        free(exec);
-    }
-    RUN_VOID_HOOK(Logic, logicSimulation_ft, ())
-    if (!veto_hook)
-    {
-        RUN_VOID_TRAMPOLINE(Logic, logicSimulation_ft, ())
-        RUN_VOID_HOOK(PostLogic, logicSimulation_ft, ())
-    }
-    veto_hook = 0;
+    scope->hook = &hooks[hookidx];
+    scope->hook->occupied = 1;
+    scope->veto = 0;
+    scope->previous = current_scope;
+    current_scope = scope;
 }
+
+static void restorescope(void)
+{
+    if (current_scope)
+    {
+        current_scope->hook->occupied = 0;
+        current_scope = current_scope->previous;
+    }
+}
+
 
 int setupHooks(void)
 {
-    hooks = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, NULL, NULL);
-    CREATE_HOOK(Logic, logicSimulation)
+    for (int i = 0; i < HOOK_COUNT; i++)
+    {
+        hooks[i].pre = g_ptr_array_new_with_free_func(free);
+        hooks[i].post = g_ptr_array_new_with_free_func(free);
+    }
     return 1;
 }

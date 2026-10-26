@@ -21,65 +21,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "plugin/plugin.h"
 #include <frida-gum.h>
-#include "macro.h"
 
 extern GumInterceptor* g_interceptor;
-extern GHashTable* hooks;
-
 int setupHooks(void);
+
+#define INTERCEPT(idx, func, replace) gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].trampoline, NULL)
 
 typedef struct {
     void* callback;
     Plugin* owner;
+} HookCallback;
+
+typedef struct {
+    gpointer trampoline;
+    GPtrArray* pre;
+    GPtrArray* post;
+    int occupied;
 } Hook;
 
-#define GET_TRAMPOLINE(x) CONCAT(x, Tramp)
-#define CREATE_TRAMPOLINE(x) static gpointer GET_TRAMPOLINE(x);
-#define GET_CALLBACK(x) CONCAT(x, Hook)
+typedef struct HookScope {
+    Hook *hook;
+    int veto;
+    struct HookScope *previous;
+} HookScope;
 
-#define CREATE_HOOK(name, func) \
-g_hash_table_insert(hooks, STRINGIFY(name), NULL); \
-g_hash_table_insert(hooks, STRINGIFY(CONCAT(Post, name)), NULL); \
-gum_interceptor_replace(g_interceptor, func, GET_CALLBACK(name), &GET_TRAMPOLINE(name), NULL);
+enum {
+    HOOK_EXAMPLE,
+    HOOK_COUNT
+} Hooks;
 
-// void hooks
-#define RUN_VOID_HOOK(name, cast, args) \
-GSList* list = g_hash_table_lookup(hooks, STRINGIFY(name)); \
-if (list) \
-{ \
-    for (GSList* entry = list; entry != NULL; entry = entry->next) \
-    { \
-        if (entry->data) \
-        { \
-            Hook* hook = entry->data; \
-            cast callback = hook->callback; \
-            callback args; \
-        } \
-    } \
-}
-
-#define RUN_VOID_TRAMPOLINE(x, cast, args) \
-cast trampoline = GET_TRAMPOLINE(x); \
-trampoline args;
-
-// return vals
-#define RUN_TRAMPOLINE(x, cast, args, storein) \
-cast trampoline = GET_TRAMPOLINE(x); \
-storein = trampoline args;
-
-#define RUN_HOOK(name, cast, args, storein) \
-GSList* list = g_hash_table_lookup(hooks, STRINGIFY(name)); \
-if (list) \
-{ \
-    for (GSList* entry = list; entry != NULL; entry = entry->next) \
-    { \
-        if (entry->data) \
-        { \
-            Hook* hook = entry->data; \
-            cast callback = hook->callback; \
-            storein = callback args; \
-        } \
-    } \
-}
+extern Hook hooks[HOOK_COUNT];
 
 #endif
