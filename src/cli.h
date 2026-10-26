@@ -19,14 +19,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef CLI_H
 #define CLI_H
 
+#include "plugin/plugin.h"
 #include "roseapi.h"
 #include <frida-gum.h>
 
 int setupcli(void);
-extern GHashTable* commands;
 
 typedef struct {
     CLICallback callback;
+    Plugin* owner;
 } Command;
 
 typedef struct {

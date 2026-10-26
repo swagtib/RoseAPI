@@ -17,12 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "cli.h"
+#include "plugin/plugin.h"
 #include <pthread.h>
 #include <frida-gum.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-GHashTable* commands;
+static GHashTable* commands;
 
 static void* handle_cli(void* arg)
 {
@@ -51,6 +52,16 @@ int setupcli(void)
 {
     commands = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, free, free);
     pthread_t thread;
+
+    Command* enable = malloc(sizeof(Command));
+    Command* disable = malloc(sizeof(Command));
+    if (!enable || !disable) return 0;
+    enable->callback = enableplugin;
+    enable->owner = NULL;
+    disable->callback = disableplugin;
+    disable->owner = NULL;
+    g_hash_table_insert(commands, "enableplugin", enable);
+    g_hash_table_insert(commands, "disableplugin", disable);
     if (pthread_create(&thread, NULL, handle_cli, NULL) != 0) return 0;
     if (pthread_detach(thread) != 0) return 0;
     return 1;

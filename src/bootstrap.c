@@ -22,10 +22,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <frida-gum.h>
 #include "hooks.h"
 #include "macro.h"
+#include "plugin/plugin.h"
 
 static int initialize(void)
 {
-    if (!setupcli()) return 0;
+    if (!setupPlugins() || !setupcli()) return 0;
     return 1;
 }
 
