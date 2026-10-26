@@ -97,7 +97,7 @@ static Plugin* loadCPlugin(const char *path)
     if (tcc_relocate(state) == -1) goto cleanupstate;
     PluginEntry entry = tcc_get_symbol(state, "plugin_init");
     if (!entry) goto cleanupstate;
-    Plugin* plugin = malloc(sizeof(Plugin));
+    Plugin* plugin = constructplugin();
     if (!plugin) goto cleanupstate;
     plugin->state = state;
     plugin->ptype = C_PLUGIN_PTYPE;
