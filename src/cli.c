@@ -70,7 +70,13 @@ static void* handle_cli(void* arg)
         int argc;
         char **argv;
         if (!g_shell_parse_argv(line, &argc, &argv, NULL)) continue;
-        if (argc > 0 && g_hash_table_contains(commands, argv[0]))
+        if (!g_hash_table_contains(commands, argv[0]))
+        {
+            LOG_ERROR("command '%s' doesn't exist\n", argv[0]);
+            g_strfreev(argv);
+            continue;
+        }
+        if (argc > 0)
         {
             ExecutedCommand* cmd = malloc(sizeof(ExecutedCommand));
             if (!cmd)

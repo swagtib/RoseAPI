@@ -92,6 +92,7 @@ static Plugin* loadCPlugin(const char *path)
     TCCState* state = tcc_new();
     if (!state) return NULL;
     if (tcc_set_output_type(state, TCC_OUTPUT_MEMORY) == -1) goto cleanupstate;
+    if (tcc_add_include_path(state, "api") == -1) goto cleanupstate;
     if (tcc_add_file(state, path) == -1) goto cleanupstate;
     if (tcc_relocate(state) == -1) goto cleanupstate;
     PluginEntry entry = tcc_get_symbol(state, "plugin_init");
@@ -169,6 +170,8 @@ void enableplugin(ARGSCLI)
         fclose(tmp);
         fclose(file);
         rename("temp_disabled", "disabledplugins.txt");
+    } else {
+        LOG_ERROR("failed loading plugin '%s'\n", args[0]);
     }
 }
 
@@ -199,6 +202,7 @@ void disableplugin(ARGSCLI)
     }
     free(buffer);
     fclose(file);
+    LOG("disabled plugin '%s'\n", args[0]);
 }
 
 int setupPlugins(void)
