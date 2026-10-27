@@ -19,12 +19,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef ROSEAPI_H
 #define ROSEAPI_H
 
-typedef void (*CLICallback)(int argc, char **args);
-#define ARGSCLI int argc, char **args
 typedef void* PluginContext;
+
+typedef void (*CLICallback)(int argc, char **args);
+
+#define ARGSCLI int argc, char **args
+
 #define C_PROLOGUE void plugin_init(PluginContext ctx)
+
 int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
-extern unsigned int veto_hook;
+
+enum {
+    HOOK_LOGIC,
+    HOOK_COUNT
+};
 
 
 #endif

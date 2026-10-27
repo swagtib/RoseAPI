@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "plugin/plugin.h"
 #include <frida-gum.h>
+#include <roseapi.h>
 
 extern GumInterceptor* g_interceptor;
 int setupHooks(void);
@@ -44,11 +45,6 @@ typedef struct HookScope {
     int veto;
     struct HookScope *previous;
 } HookScope;
-
-enum {
-    HOOK_EXAMPLE,
-    HOOK_COUNT
-} Hooks;
 
 extern Hook hooks[HOOK_COUNT];
 

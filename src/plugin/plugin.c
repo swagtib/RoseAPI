@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "plugin/plugin.h"
 #include "cli.h"
+#include "hooks.h"
 #include "roseapi.h"
 #include <frida-gum.h>
 #include <libtcc.h>
@@ -49,6 +50,28 @@ void destructplugin(void* ptr) // g_hash_table_new_full's value destruct functio
             tcc_delete(plugin->state);
         }
     }
+
+    for (int i = 0; i < HOOK_COUNT; i++)
+    {
+        Hook* curhook = &hooks[i];
+        for (int j = (int)curhook->pre->len - 1; j >= 0; j--)
+        {
+            HookCallback* hcall = g_ptr_array_index(curhook->pre, j);
+            if (hcall && hcall->owner == plugin)
+            {
+                g_ptr_array_remove_index(curhook->pre, j);
+            }
+        }
+        for (int j = (int)curhook->post->len - 1; j >= 0; j--)
+        {
+            HookCallback* hcall = g_ptr_array_index(curhook->post, j);
+            if (hcall && hcall->owner == plugin)
+            {
+                g_ptr_array_remove_index(curhook->post, j);
+            }
+        }
+    }
+
     GHashTableIter iter;
     gpointer key, value;
     g_hash_table_iter_init(&iter, commands);
@@ -59,7 +82,7 @@ void destructplugin(void* ptr) // g_hash_table_new_full's value destruct functio
         {
             g_hash_table_iter_remove(&iter);
         }
-    }
+    } 
     free(plugin);
     return;
 }
