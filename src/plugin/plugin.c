@@ -145,7 +145,7 @@ void enableplugin(ARGSCLI)
     int status = loadplugin(args[0]);
     if (status)
     {
-        LOG("loaded plugin '%s'\n", args[0]);
+        pretty_log(LOG_INFO, "loaded plugin '%s'\n", args[0]);
         FILE* file = fopen("disabledplugins.txt", "r");
         if (!file) return;
         FILE* tmp = fopen("temp_disabled", "w");
@@ -171,7 +171,7 @@ void enableplugin(ARGSCLI)
         fclose(file);
         rename("temp_disabled", "disabledplugins.txt");
     } else {
-        LOG_ERROR("failed loading plugin '%s'\n", args[0]);
+        pretty_log(LOG_ERROR, "failed loading plugin '%s'\n", args[0]);
     }
 }
 
@@ -202,7 +202,7 @@ void disableplugin(ARGSCLI)
     }
     free(buffer);
     fclose(file);
-    LOG("disabled plugin '%s'\n", args[0]);
+    pretty_log(LOG_INFO, "disabled plugin '%s'\n", args[0]);
 }
 
 int setupPlugins(void)
@@ -257,7 +257,7 @@ int setupPlugins(void)
                 int status = loadplugin(entry->d_name);
                 if (status)
                 {
-                    LOG("auto loaded '%s'\n", entry->d_name);
+                    pretty_log(LOG_INFO, "auto loaded '%s'\n", entry->d_name);
                 }
             }
         }

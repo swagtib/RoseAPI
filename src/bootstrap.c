@@ -36,7 +36,7 @@ static void resetsafetynet(void)
     resetGame_ft callback = resetTrampoline;
     callback();
     gum_interceptor_revert(g_interceptor, resetGame);
-    LOG("engine ready\n");
+    pretty_log(LOG_INFO, "engine ready\n");
     if (!initialize()) ragequit;
 }
 

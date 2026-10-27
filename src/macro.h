@@ -27,15 +27,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define CONCAT_HELPER(x, y) x##y
 #define CONCAT(x, y) CONCAT_HELPER(x, y)
-
-#define escapeyellow "\x1b[33m"
-#define escapebold "\x1b[1m"
-#define escapereset "\x1b[0m"
-#define roseapi escapeyellow escapebold "[RoseAPI] " escapereset escapebold
-
-#define LOG(text, ...) fprintf(stdout, roseapi text escapereset, ##__VA_ARGS__)
-#define LOG_ERROR(text, ...) fprintf(stderr, roseapi text escapereset, ##__VA_ARGS__)
-
 #define ragequit exit(EXIT_FAILURE)
+
+void pretty_log(int log, const char* fmt, ...);
+
+enum {
+    LOG_INFO,
+    LOG_ERROR
+};
 
 #endif

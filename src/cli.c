@@ -41,7 +41,7 @@ int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
     }
     if (g_hash_table_contains(commands, key))
     {
-        LOG_ERROR("command '%s' is already registered\n", key);
+        pretty_log(LOG_ERROR, "command '%s' is already registered\n", key);
         free(key);
         return 0;
     }
@@ -72,7 +72,7 @@ static void* handle_cli(void* arg)
         if (!g_shell_parse_argv(line, &argc, &argv, NULL)) continue;
         if (!g_hash_table_contains(commands, argv[0]))
         {
-            LOG_ERROR("command '%s' doesn't exist\n", argv[0]);
+            pretty_log(LOG_ERROR, "command '%s' doesn't exist\n", argv[0]);
             g_strfreev(argv);
             continue;
         }
