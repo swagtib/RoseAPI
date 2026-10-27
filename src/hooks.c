@@ -22,11 +22,48 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "cli.h"
 #include "engine.h"
 #include "roseapi.h"
+#include "plugin/plugin.h"
 
 GumInterceptor* g_interceptor = NULL;
 Hook hooks[HOOK_COUNT];
 
 static HookScope* current_scope = NULL;
+
+int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
+{
+    if (!ctx || !callback) return 0;
+    if (!(h >= 0 && h < HOOK_COUNT)) return 0;
+    if (!(flags & FLAG_HOOK_POST) && !(flags & FLAG_HOOK_PRE))
+    {
+        flags |= FLAG_HOOK_PRE;
+    }
+    if (flags & FLAG_HOOK_POST && flags & FLAG_HOOK_PRE)
+    {
+        return 0;
+    }
+    Hook* hook = &hooks[h];
+    GPtrArray* array = NULL;
+    if (flags & FLAG_HOOK_PRE) array = hook->pre;
+    if (flags & FLAG_HOOK_POST) array = hook->post;
+    if (!array) return 0;
+    HookCallback* hcall = malloc(sizeof(HookCallback));
+    if (!hcall) return 0;
+    pthread_mutex_lock(&pluginmutex);
+    int found = pluginisregistered(ctx);
+    if (found)
+    {
+        hcall->callback = callback;
+        hcall->owner = ctx;
+        if (flags & FLAG_HOOK_PRIORITY)
+        {
+            g_ptr_array_insert(array, 0, hcall);
+        } else g_ptr_array_add(array, hcall);
+    } else {
+        free(hcall);
+    }
+    pthread_mutex_unlock(&pluginmutex);
+    return found;
+}
 
 static void pushscope(HookScope *scope, int hookidx)
 {

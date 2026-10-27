@@ -20,7 +20,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define PLUGIN_H
 
 #include "roseapi.h"
+#include <pthread.h>
 typedef void (*PluginEntry)(PluginContext);
+
+extern pthread_mutex_t pluginmutex;
 
 typedef struct {
     unsigned int ptype;
@@ -36,5 +39,6 @@ int setupPlugins(void);
 
 void enableplugin(ARGSCLI);
 void disableplugin(ARGSCLI);
+int pluginisregistered(Plugin* ptr);
 
 #endif

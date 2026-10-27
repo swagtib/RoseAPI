@@ -51,10 +51,19 @@ int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
         free(key);
         return 0;
     }
-    cmd->callback = callback;
-    cmd->owner = ctx;
-    g_hash_table_insert(commands, key, cmd);
-    return 1;
+    pthread_mutex_lock(&pluginmutex);
+    int found = pluginisregistered(ctx);
+    if (found)
+    {
+        cmd->callback = callback;
+        cmd->owner = ctx;
+        g_hash_table_insert(commands, key, cmd);
+    } else {
+        free(key);
+        free(cmd);
+    }
+    pthread_mutex_unlock(&pluginmutex);
+    return found;
 }
 
 static void* handle_cli(void* arg)

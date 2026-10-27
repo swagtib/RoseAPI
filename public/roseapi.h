@@ -33,6 +33,10 @@ enum {
     HOOK_COUNT
 };
 
+#define FLAG_HOOK_PRE (1u << 0)
+#define FLAG_HOOK_POST (1u << 1)
+#define FLAG_HOOK_PRIORITY (1u << 2)
+
 typedef struct {
     float x;
     float y;

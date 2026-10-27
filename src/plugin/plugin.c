@@ -28,6 +28,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <string.h>
 #include "macro.h"
 
+pthread_mutex_t pluginmutex = PTHREAD_MUTEX_INITIALIZER;
+
 GHashTable* plugins;
 
 Plugin* constructplugin(void)
@@ -42,15 +44,8 @@ Plugin* constructplugin(void)
 void destructplugin(void* ptr) // g_hash_table_new_full's value destruct function expects a void(*)(void*) and it's ugly casting it..
 {
     if (!ptr) return;
+    pthread_mutex_lock(&pluginmutex);
     Plugin* plugin = ptr;
-    if (plugin->state)
-    {
-        if (plugin->ptype == C_PLUGIN_PTYPE)
-        {
-            tcc_delete(plugin->state);
-        }
-    }
-
     for (int i = 0; i < HOOK_COUNT; i++)
     {
         Hook* curhook = &hooks[i];
@@ -83,7 +78,17 @@ void destructplugin(void* ptr) // g_hash_table_new_full's value destruct functio
             g_hash_table_iter_remove(&iter);
         }
     } 
+
+    if (plugin->state)
+    {
+        if (plugin->ptype == C_PLUGIN_PTYPE)
+        {
+            tcc_delete(plugin->state);
+        }
+    }
+
     free(plugin);
+    pthread_mutex_unlock(&pluginmutex);
     return;
 }
 
@@ -272,4 +277,16 @@ int setupPlugins(void)
         free(disabled);
     }
     return 1;
+}
+
+int pluginisregistered(Plugin* ptr)
+{
+    GHashTableIter iter;
+    gpointer key, val;
+    g_hash_table_iter_init(&iter, plugins);
+    while (g_hash_table_iter_next(&iter, &key, &val))
+    {
+        if (val == ptr) return 1;
+    }
+    return 0;
 }
