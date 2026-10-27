@@ -50,6 +50,14 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
 
 add_library(RoseAPI SHARED ${SOURCES})
 
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipostatus OUTPUT ipoerror)
+if (ipostatus)
+    set_property(TARGET RoseAPI PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+    message(WARNING "ipo isn't supported ${ipoerror}")
+endif()
+
 target_include_directories(RoseAPI
     PUBLIC  "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/public"
     PRIVATE "${FRIDA_GUM_DEVKIT_DIR}" "${TCC_INCLUDE_DIR}"
