@@ -75,5 +75,6 @@ target_link_options(RoseAPI PRIVATE
 )
 
 set_target_properties(RoseAPI PROPERTIES
+    C_VISIBILITY_PRESET hidden
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
 )

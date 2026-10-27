@@ -16,7 +16,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "macro.h"
-#include <stdio.h>
 #include <stdarg.h>
 
 #define ANSI_ESCAPE "\x1b"
@@ -28,7 +27,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define TITLE "[RoseAPI] "
 #define ANSI_TITLE ANSI_ESCAPE ANSI_BOLD ANSI_YELLOW TITLE ANSI_RESET
-
 
 void pretty_log(int log, const char* fmt, ...)
 {
