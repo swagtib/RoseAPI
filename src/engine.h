@@ -22,43 +22,37 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 void setup38offsets(uintptr_t base);
 
-struct Vector {
+typedef struct {
     float x;
     float y;
     float z;
-};
+} Vector;
 
-struct RotMatrix {
-    float x1;
-    float y1;
-    float z1;
-    float x2;
-    float y2;
-    float z2;
-    float x3;
-    float y3;
-    float z3;
-};
+typedef struct {
+    Vector xaxis;
+    Vector yaxis;
+    Vector zaxis;
+} RotMatrix;
 
-struct RigidBody {
+typedef struct {
     int active;
     int type;
     int settled;
     int linkedHumanOrItemID;
     int linkedBoneID;
     float mass;
-    struct Vector pos;
-    struct Vector vel;
-    struct Vector startVel;
-    struct RotMatrix rot;
-    struct RotMatrix rotVel;
-    struct Vector scale;
-    struct Vector scaleReciprocal;
+    Vector pos;
+    Vector vel;
+    Vector startVel;
+    RotMatrix rot;
+    RotMatrix rotVel;
+    Vector scale;
+    Vector scaleReciprocal;
     float smallestScaleFactor;
     char unkpad70[28];
-};
+} RigidBody;
 
-struct EarShot {
+typedef struct {
     int active;
     int playerID;
     int humanID;
@@ -69,9 +63,9 @@ struct EarShot {
     int unk4;
     float distance;
     float volume;
-};
+} EarShot;
 
-struct Connection {
+typedef struct {
     unsigned int address;
     unsigned int port;
     int unusedConnectionFilter;
@@ -85,15 +79,15 @@ struct Connection {
     char unkpad0[36];
     int numReceivedEvents;
     char unkpad1[12];
-    struct EarShot earShots[8];
+    EarShot earShots[8];
     char unkpad2[0];
     int spectatingHumanID;
     char unkpad3[130048];
-    struct Vector cameraPosition;
+    Vector cameraPosition;
     char unkpad4[58420];
-};
+} Connection;
 
-struct Account {
+typedef struct {
     int token_unused;
     int token2_unused;
     int subRosaID;
@@ -113,9 +107,9 @@ struct Account {
     char unkpad5[8];
     int banTime;
     int isAdmin;
-};
+} Account;
 
-struct VehicleType {
+typedef struct {
     int usesExternalModel;
     int unk0;
     int controllableState;
@@ -127,15 +121,15 @@ struct VehicleType {
     float acceleration;
     int numWheels;
     char unkpad52[3256];
-    struct Vector carBodyOffset;
+    Vector carBodyOffset;
     char unkpad53[128];
-};
+} VehicleType;
 
-struct Event {
+typedef struct {
     int type;
     int tickCreated;
-    struct Vector vectorA;
-    struct Vector vectorB;
+    Vector vectorA;
+    Vector vectorB;
     int a;
     int b;
     int c;
@@ -145,15 +139,9 @@ struct Event {
     int unk0;
     int unk1;
     char message[64];
-};
+} Event;
 
-union Item___anon_union_computerCurrentLine_memoText_team {
-    unsigned int computerCurrentLine;
-    unsigned int memoText;
-    int team;
-};
-
-struct Item {
+typedef struct {
     int active;
     int physicsSim;
     int physicsSettled;
@@ -170,16 +158,16 @@ struct Item {
     int numChildItems;
     int childItemIDs[8];
     int bodyID;
-    struct Vector pos;
-    struct Vector pos2;
-    struct Vector vel;
-    struct Vector vel2;
-    struct Vector vel3;
-    struct Vector vel4;
-    struct RotMatrix rot;
+    Vector pos;
+    Vector pos2;
+    Vector vel;
+    Vector vel2;
+    Vector vel3;
+    Vector vel4;
+    RotMatrix rot;
     char unkpad39[60];
-    struct Vector boundingBoxCornerA;
-    struct Vector boundingBoxCornerB;
+    Vector boundingBoxCornerA;
+    Vector boundingBoxCornerB;
     char unkpad40[28];
     int health;
     int cooldown;
@@ -204,7 +192,11 @@ struct Item {
     int cashBillAmount;
     int cashPureValue;
     char unkpad45[188];
-    union Item___anon_union_computerCurrentLine_memoText_team __anon_union_computerCurrentLine_memoText_team;
+    union {
+        unsigned int computerCurrentLine;
+        unsigned int memoText;
+        int team;
+    };
     unsigned int computerTopLine;
     int computerCursor;
     char computerLines[32][64];
@@ -217,9 +209,9 @@ struct Item {
     int computerMissionConnectTimer;
     int computerMissionSubMenu;
     char unkpad49[1300];
-};
+} Item;
 
-struct Voice {
+typedef struct {
     int isSilenced;
     int unk0;
     int volumeLevel;
@@ -228,32 +220,32 @@ struct Voice {
     int frameVolumeLevels[64];
     int frameSizes[64];
     unsigned char frames[64][2048];
-};
+} Voice;
 
-struct Bone {
+typedef struct {
     int bodyID;
-    struct Vector pos;
-    struct Vector pos2;
-    struct Vector vel;
+    Vector pos;
+    Vector pos2;
+    Vector vel;
     int unk0;
     int unk1;
     int unk2;
-    struct RotMatrix rot;
+    RotMatrix rot;
     char unkpad20[44];
     float mass;
-    struct Vector scaleReciprocal;
-    struct Vector scale;
+    Vector scaleReciprocal;
+    Vector scale;
     char unkpad21[152];
-};
+} Bone;
 
-struct InventorySlot {
+typedef struct {
     int count;
     int primaryItemID;
     int secondaryItemID;
     char unkpad22[28];
-};
+} InventorySlot;
 
-struct Human {
+typedef struct {
     int active;
     int physicsSim;
     int playerID;
@@ -286,8 +278,8 @@ struct Human {
     int unk18;
     int damage;
     int isStanding;
-    struct Vector pos;
-    struct Vector pos2;
+    Vector pos;
+    Vector pos2;
     float viewYaw;
     float viewPitch;
     char unkpad23[56];
@@ -305,9 +297,9 @@ struct Human {
     unsigned int inputFlags;
     unsigned int lastInputFlags;
     char unkpad27[4];
-    struct Bone bones[16];
+    Bone bones[16];
     char unkpad28[21808];
-    struct InventorySlot inventorySlots[6];
+    InventorySlot inventorySlots[6];
     char unkpad29[400];
     int health;
     int bloodLevel;
@@ -346,24 +338,24 @@ struct Human {
     int necklace;
     int lastUpdatedWantedGroup;
     char unkpad32[72];
-};
+} Human;
 
-struct MenuButton {
+typedef struct {
     int id;
     char text[64];
     int unk;
-};
+} MenuButton;
 
-struct Action {
+typedef struct {
     int type;
     int a;
     int b;
     int c;
     int d;
     char text[64];
-};
+} Action;
 
-struct Player {
+typedef struct {
     int active;
     char name[32];
     int token_unused;
@@ -420,16 +412,16 @@ struct Player {
     int numActions;
     int lastNumActions;
     char unkpad14[12];
-    struct Action actions[64];
+    Action actions[64];
     char unkpad15[1100];
     int numMenuButtons;
-    struct MenuButton menuButtons[32];
+    MenuButton menuButtons[32];
     char unkpad16[2304];
     int isBot;
     int isZombie;
     char unkpad17[24];
     int botHasDestination;
-    struct Vector botDestination;
+    Vector botDestination;
     char unkpad18[2660];
     int gender;
     int skinColor;
@@ -443,9 +435,9 @@ struct Player {
     int head;
     int necklace;
     char unkpad19[92];
-};
+} Player;
 
-struct Wheel {
+typedef struct {
     int bodyID;
     int unk0;
     int isPopped;
@@ -462,9 +454,9 @@ struct Wheel {
     float vehicleHeight;
     float skid;
     char unkpad59[36];
-};
+} Wheel;
 
-struct Vehicle {
+typedef struct {
     int active;
     unsigned int type;
     int controllableState;
@@ -477,11 +469,11 @@ struct Vehicle {
     int isLocked;
     int unk3;
     int bodyID;
-    struct Vector pos;
-    struct Vector pos2;
-    struct RotMatrix rot;
+    Vector pos;
+    Vector pos2;
+    RotMatrix rot;
     int unk4;
-    struct Vector vel;
+    Vector vel;
     char unkpad60[10116];
     int windowStates[8];
     char unkpad61[3556];
@@ -497,32 +489,32 @@ struct Vehicle {
     int engineRPM;
     char unkpad65[12];
     int numWheels;
-    struct Wheel wheels[6];
+    Wheel wheels[6];
     char unkpad66[4700];
     int bladeBodyID;
     char unkpad67[304];
     int numSeats;
     char unkpad68[136];
-};
+} Vehicle;
 
-struct Bond {
+typedef struct {
     int active;
     int type;
     int unk0;
     int despawnTime;
     char unkpad71[28];
-    struct Vector globalPos;
-    struct Vector localPos;
-    struct Vector otherLocalPos;
+    Vector globalPos;
+    Vector localPos;
+    Vector otherLocalPos;
     char unkpad72[72];
     int bodyID;
     int otherBodyID;
     char unkpad73[84];
-};
+} Bond;
 
-struct StreetIntersection {
+typedef struct {
     int unk0[3];
-    struct Vector pos;
+    Vector pos;
     int streetEast;
     int streetSouth;
     int streetWest;
@@ -536,62 +528,62 @@ struct StreetIntersection {
     int lightWest;
     int lightNorth;
     char unkpad76[40];
-};
+} StreetIntersection;
 
-struct StreetLane {
+typedef struct {
     int direction;
-    struct Vector posA;
-    struct Vector posB;
-};
+    Vector posA;
+    Vector posB;
+} StreetLane;
 
-struct Street {
+typedef struct {
     char name[32];
     int unk0;
     int intersectionA;
     int intersectionB;
     int unk1[3];
     int numLanes;
-    struct StreetLane lanes[16];
+    StreetLane lanes[16];
     float unk2[6];
-    struct Vector trafficCuboidA;
-    struct Vector trafficCuboidB;
+    Vector trafficCuboidA;
+    Vector trafficCuboidB;
     int numTraffic;
     char unkpad74[1024];
-};
+} Street;
 
-struct ShopCar {
+typedef struct {
     int type;
     int price;
     int color;
-};
+} ShopCar;
 
-struct Building {
+typedef struct {
     int type;
     int unk0[3];
-    struct Vector pos;
-    struct RotMatrix spawnRot;
-    struct Vector interiorCuboidA;
-    struct Vector interiorCuboidB;
+    Vector pos;
+    RotMatrix spawnRot;
+    Vector interiorCuboidA;
+    Vector interiorCuboidB;
     char unkpad80[51612];
     int numShopCars;
-    struct ShopCar shopCars[16];
+    ShopCar shopCars[16];
     int shopCarSales;
     char unkpad81[4176];
-};
+} Building;
 
-struct Bullet {
+typedef struct {
     unsigned int type;
     int time;
     int playerID;
     float unk0;
     float unk1;
-    struct Vector lastPos;
-    struct Vector pos;
-    struct Vector vel;
+    Vector lastPos;
+    Vector pos;
+    Vector vel;
     char unkpad69[36];
-};
+} Bullet;
 
-struct Mission {
+typedef struct {
     int active;
     char unkpad82[8];
     int type;
@@ -606,34 +598,34 @@ struct Mission {
     int location;
     int providedCash;
     char unkpad85[1036];
-};
+} Mission;
 
-struct Corporation {
-    struct Vector interiorCuboidA;
-    struct Vector interiorCuboidB;
-    struct Vector vaultCuboidA;
-    struct Vector vaultCuboidB;
+typedef struct {
+    Vector interiorCuboidA;
+    Vector interiorCuboidB;
+    Vector vaultCuboidA;
+    Vector vaultCuboidB;
     float tableOrientation;
-    struct Vector tableLocation;
-    struct Vector spawnLocation;
+    Vector tableLocation;
+    Vector spawnLocation;
     char unkpad86[8];
     int players;
     char unkpad87[8];
     int isDoorOpen;
     int managerPlayerID;
     char unkpad88[276];
-    struct Vector doorPos;
+    Vector doorPos;
     char unkpad89[20];
-    struct Mission missions[16];
+    Mission missions[16];
     char unkpad90[1124];
-    struct Vector carSpawn1;
-    struct RotMatrix unk0;
+    Vector carSpawn1;
+    RotMatrix unk0;
     char unkpad91[4052];
-};
+} Corporation;
 
-struct LineIntersectResult {
-    struct Vector pos;
-    struct Vector normal;
+typedef struct LineIntersectResult {
+    Vector pos;
+    Vector normal;
     float fraction;
     float unk0;
     int unk1;
@@ -664,9 +656,9 @@ struct LineIntersectResult {
     int unk25;
     int unk26;
     int unk27;
-};
+} LineIntersectResult;
 
-struct ItemType {
+typedef struct {
     int unk0;
     int price;
     float mass;
@@ -682,60 +674,60 @@ struct ItemType {
     char name[64];
     char unkpad33[12];
     int numHands;
-    struct Vector rightHandPos;
-    struct Vector leftHandPos;
+    Vector rightHandPos;
+    Vector leftHandPos;
     char unkpad34[24];
-    struct Vector primaryGripRotAxis;
+    Vector primaryGripRotAxis;
     float primaryGripRotation;
-    struct Vector secondaryGripRotAxis;
+    Vector secondaryGripRotAxis;
     float secondaryGripRotation;
     char unkpad35[52];
-    struct Vector boundsCenter;
+    Vector boundsCenter;
     char unkpad36[12];
     int canMountTo[46];
     char unkpad37[4544];
-    struct Vector gunHoldingPos;
+    Vector gunHoldingPos;
     char unkpad38[48];
-};
+} ItemType;
 
-struct TrafficCar {
+typedef struct {
     int type;
     int humanID;
     int vehicleID;
     int state;
-    struct Vector pos;
-    struct Vector vel;
+    Vector pos;
+    Vector vel;
     float yaw;
-    struct RotMatrix rot;
+    RotMatrix rot;
     char unkpad77[44];
     int isBot;
     int isAggressive;
     char unkpad78[1364];
     int color;
     char unkpad79[32];
-};
+} TrafficCar;
 
 typedef void (*deleteBond_ft)(int id);
 typedef void (*accountDeathTax_ft)(int id);
-typedef void (*createEventBullet_ft)(int bulletType, struct Vector * pos, struct Vector * vel, int itemID);
-typedef void (*createEventBulletHit_ft)(int unk, int hitType, struct Vector * pos, struct Vector * normal);
+typedef void (*createEventBullet_ft)(int bulletType, Vector * pos, Vector * vel, int itemID);
+typedef void (*createEventBulletHit_ft)(int unk, int hitType, Vector * pos, Vector * normal);
 typedef void (*createEventMessage_ft)(int type, char * message, int speakerID, int distance);
 typedef void (*createEventCreateVehicle_ft)(int id);
-typedef void (*createEventUpdateVehicle_ft)(int vehicleID, int updateType, int partID, struct Vector * pos, struct Vector * hitVelocity);
+typedef void (*createEventUpdateVehicle_ft)(int vehicleID, int updateType, int partID, Vector * pos, Vector * hitVelocity);
 typedef void (*createEventUpdateItemInfo_ft)(int id);
 typedef void (*createEventUpdatePlayer_ft)(int id);
 typedef void (*createEventUpdatePlayerFinance_ft)(int id);
 typedef void (*playerDeathTax_ft)(int id);
-typedef void (*createEventSound_ft)(int soundType, struct Vector * pos, float volume, float pitch);
+typedef void (*createEventSound_ft)(int soundType, Vector * pos, float volume, float pitch);
 typedef void (*createEventSoundItem_ft)(unsigned int soundType, int itemID, float volume, float pitch);
 typedef void (*createEventUpdateCorpDoorState_ft)(int corpID, int state);
 typedef void (*createEventUpdateCorpMission_ft)(int corpID, int missionID);
-typedef void (*createEventUpdateElimState_ft)(int playerID, int trackerVisible, int playerTeam, int saviorPlayerID, struct Vector * saviorPos);
-typedef void (*createEventExplosion_ft)(int type, struct Vector * pos);
+typedef void (*createEventUpdateElimState_ft)(int playerID, int trackerVisible, int playerTeam, int saviorPlayerID, Vector * saviorPos);
+typedef void (*createEventExplosion_ft)(int type, Vector * pos);
 typedef void (*playerGiveWantedLevel_ft)(int playerID, int victimPlayerID, int basePoints);
 typedef void (*deleteHuman_ft)(int id);
 typedef void (*deleteVehicle_ft)(int id);
-typedef int (*lineIntersectTriangle_ft)(struct Vector * outPos, struct Vector * normal, float * outFraction, struct Vector * posA, struct Vector * posB, struct Vector * triA, struct Vector * triB, struct Vector * triC);
+typedef int (*lineIntersectTriangle_ft)(Vector * outPos, Vector * normal, float * outFraction, Vector * posA, Vector * posB, Vector * triA, Vector * triB, Vector * triC);
 typedef int (*createAccountByJoinTicket_ft)(int identifier, unsigned int ticket);
 typedef void (*saveAccountsServer_ft)(void);
 typedef void (*aiTrafficCarDestination_ft)(int id, int a, int b, int c, int d);
@@ -743,16 +735,16 @@ typedef void (*aiTrafficCar_ft)(int id);
 typedef int (*areaGetBlock_ft)(int zero, int blockX, int blockY, int blockZ);
 typedef int (*areaDeleteBlock_ft)(int zero, int blockX, int blockY, int blockZ);
 typedef int (*areaCreateBlock_ft)(int zero, int blockX, int blockY, int blockZ, unsigned int flags, short * unk);
-typedef int (*createBondRigidBodyToLevel_ft)(int bodyID, struct Vector * localPos, struct Vector * globalPos);
-typedef int (*createBondRigidBodyToRigidBody_ft)(int aBodyID, int bBodyID, struct Vector * aLocalPos, struct Vector * bLocalPos);
+typedef int (*createBondRigidBodyToLevel_ft)(int bodyID, Vector * localPos, Vector * globalPos);
+typedef int (*createBondRigidBodyToRigidBody_ft)(int aBodyID, int bBodyID, Vector * aLocalPos, Vector * bLocalPos);
 typedef int (*createBondRigidBodyRotRigidBody_ft)(int aBodyID, int bBodyID);
-typedef void (*addCollisionRigidBodyOnRigidBody_ft)(int aBodyID, int bBodyID, struct Vector * aLocalPos, struct Vector * bLocalPos, struct Vector * normal, float arg6, float arg7, float arg8, float arg9);
-typedef void (*addCollisionRigidBodyOnLevel_ft)(int bodyID, struct Vector * localPos, struct Vector * normal, float arg4, float arg5, float arg6, float arg7);
-typedef int (*createBullet_ft)(int type, struct Vector * pos, struct Vector * vel, int playerID);
+typedef void (*addCollisionRigidBodyOnRigidBody_ft)(int aBodyID, int bBodyID, Vector * aLocalPos, Vector * bLocalPos, Vector * normal, float arg6, float arg7, float arg8, float arg9);
+typedef void (*addCollisionRigidBodyOnLevel_ft)(int bodyID, Vector * localPos, Vector * normal, float arg4, float arg5, float arg6, float arg7);
+typedef int (*createBullet_ft)(int type, Vector * pos, Vector * vel, int playerID);
 typedef void (*bulletTimeToLive_ft)(void);
 typedef void (*economyCarMarket_ft)(void);
 typedef void (*humanApplyDamage_ft)(int humanID, int bone, int unk, int damage);
-typedef int (*lineIntersectHuman_ft)(int humanID, struct Vector * posA, struct Vector * posB, float padding);
+typedef int (*lineIntersectHuman_ft)(int humanID, Vector * posA, Vector * posB, float padding);
 typedef int (*itemCashGetBillValue_ft)(int itemID);
 typedef int (*itemCashAddBill_ft)(int itemID, int zero, int amount);
 typedef void (*itemCashRemoveBill_ft)(int itemID, int amount);
@@ -766,20 +758,20 @@ typedef void (*itemWeaponSimulation_ft)(int id);
 typedef void (*vehicleApplyDamage_ft)(int vehicleID, int damage);
 typedef void (*vehicleSimulateSuspensions_ft)(void);
 typedef void (*humanCollisionVehicle_ft)(int humanID, int vehicleID);
-typedef int (*lineIntersectVehicle_ft)(int vehicleID, struct Vector * posA, struct Vector * posB, int includeWheels);
+typedef int (*lineIntersectVehicle_ft)(int vehicleID, Vector * posA, Vector * posB, int includeWheels);
 typedef int (*createPlayer_ft)(void);
 typedef void (*deletePlayer_ft)(int id);
 typedef void (*prepareObjectPacket_ft)(void);
-typedef void (*humanLimbInverseKinematics_ft)(int arg1, int arg2, int arg3, struct Vector * arg4, struct RotMatrix * arg5, struct Vector * arg6, float arg7, float arg8, float arg9, float * arg10, struct Vector * arg11, struct Vector * arg12, struct Vector * arg13, char arg14);
-typedef int (*createRigidBody_ft)(int type, struct Vector * pos, struct RotMatrix * rot, struct Vector * vel, float mass, struct Vector * scale);
-typedef int (*createHuman_ft)(struct Vector * pos, struct RotMatrix * rot, int playerID);
-typedef int (*createItem_ft)(int type, struct Vector * pos, struct Vector * vel, struct RotMatrix * rot);
+typedef void (*humanLimbInverseKinematics_ft)(int arg1, int arg2, int arg3, Vector * arg4, RotMatrix * arg5, Vector * arg6, float arg7, float arg8, float arg9, float * arg10, Vector * arg11, Vector * arg12, Vector * arg13, char arg14);
+typedef int (*createRigidBody_ft)(int type, Vector * pos, RotMatrix * rot, Vector * vel, float mass, Vector * scale);
+typedef int (*createHuman_ft)(Vector * pos, RotMatrix * rot, int playerID);
+typedef int (*createItem_ft)(int type, Vector * pos, Vector * vel, RotMatrix * rot);
 typedef int (*itemComputerInput_ft)(int itemID, unsigned int character);
-typedef int (*createRope_ft)(struct Vector * pos, struct RotMatrix * rot);
+typedef int (*createRope_ft)(Vector * pos, RotMatrix * rot);
 typedef void (*scenarioArmHuman_ft)(int human, int weapon, int magCount);
-typedef int (*createVehicle_ft)(int type, struct Vector * pos, struct Vector * vel, struct RotMatrix * rot, int color);
+typedef int (*createVehicle_ft)(int type, Vector * pos, Vector * vel, RotMatrix * rot, int color);
 typedef void (*rigidBodySimulation_ft)(void);
-typedef int (*lineIntersectLevel_ft)(struct Vector * posA, struct Vector * posB, int includeCityObjects);
+typedef int (*lineIntersectLevel_ft)(Vector * posA, Vector * posB, int includeCityObjects);
 typedef void (*playerAI_ft)(int id);
 typedef void (*bulletSimulation_ft)(void);
 typedef void (*createTraffic_ft)(int amount);
@@ -899,24 +891,24 @@ extern serverReceive_ft serverReceive;
 extern float* gravity;
 extern unsigned int* subVersion;
 extern unsigned int* version;
-extern struct RigidBody* bodies;
-extern struct Connection* connections;
+extern RigidBody* bodies;
+extern Connection* connections;
 extern int* identifier;
-extern struct Account* accounts;
-extern struct VehicleType* vehicleTypes;
-extern struct Event* events;
-extern struct Item* items;
-extern struct Voice* voices;
-extern struct Human* humans;
+extern Account* accounts;
+extern VehicleType* vehicleTypes;
+extern Event* events;
+extern Item* items;
+extern Voice* voices;
+extern Human* humans;
 extern unsigned int* sunTime;
 extern unsigned int* numTrafficCars;
-extern struct Player* players;
+extern Player* players;
 extern unsigned int* serverPort;
 extern int* serverMaxBytesPerSecond;
 extern char* adminPassword;
 extern char* password;
-extern struct Vehicle* vehicles;
-extern struct Bond* bonds;
+extern Vehicle* vehicles;
+extern Bond* bonds;
 extern char* serverName;
 extern int* isPassworded;
 extern int* maxPlayers;
@@ -926,12 +918,12 @@ extern unsigned char* packet;
 extern int* isLevelLoaded;
 extern char* loadedMapName;
 extern unsigned int* numStreetIntersections;
-extern struct StreetIntersection* streetIntersections;
+extern StreetIntersection* streetIntersections;
 extern unsigned int* numStreets;
-extern struct Street* streets;
+extern Street* streets;
 extern unsigned int* numBuildings;
-extern struct Building* buildings;
-extern struct Bullet* bullets;
+extern Building* buildings;
+extern Bullet* bullets;
 extern int* gameType;
 extern char* mapName;
 extern int* Round_weekDay;
@@ -939,7 +931,7 @@ extern int* roundNumber;
 extern int* gameState;
 extern int* gameTimer;
 extern int* ticksSinceReset;
-extern struct Corporation* corporations;
+extern Corporation* corporations;
 extern int* Round_roundTime;
 extern int* Round_startCash;
 extern unsigned char* Round_weekly;
@@ -959,7 +951,7 @@ extern unsigned char* World_respawnTeam;
 extern unsigned int* numBullets;
 extern unsigned short* numEvents;
 extern unsigned int* numConnections;
-extern struct LineIntersectResult* lineIntersectResult;
-extern struct ItemType* itemTypes;
-extern struct TrafficCar* trafficCars;
+extern LineIntersectResult* lineIntersectResult;
+extern ItemType* itemTypes;
+extern TrafficCar* trafficCars;
 #endif

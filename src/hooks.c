@@ -46,8 +46,6 @@ static void popscope(void)
     }
 }
 
-
-
 static void LogicHook(void)
 {
     HookScope scope;

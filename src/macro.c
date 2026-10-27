@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "macro.h"
 #include <stdarg.h>
+#include <stdio.h>
 
 #define ANSI_ESCAPE "\x1b"
 #define ANSI_BOLD "[1;"
