@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 static int initialize(void)
 {
+    if (!setuphooks()) return 0;
     return 1;
 }
 
@@ -40,7 +41,7 @@ static void resetsafetynet(void)
 void bootstrapapi(uintptr_t base)
 {
     setup38offsets(base);
-    g_interceptor = gum_interceptor_obtain(); //we cache it globally to avoid reference leaks
+    g_interceptor = gum_interceptor_obtain(); // we cache it globally to avoid reference leaks
     if (!g_interceptor) ragequit;
     if (gum_interceptor_replace(g_interceptor, resetGame, resetsafetynet, &resetTrampoline, NULL) != GUM_REPLACE_OK) ragequit;
 }

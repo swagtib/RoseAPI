@@ -23,4 +23,33 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 extern GumInterceptor* g_interceptor;
 
+int setuphooks(void);
+
+#define INTERCEPT(idx, func, replace) gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].trampoline, NULL)
+
+typedef struct {
+    void* callback;
+    //Plugin* plugin;
+} HookCallback;
+
+typedef struct {
+    gpointer trampoline;
+    GPtrArray* pre;
+    GPtrArray* post;
+    int occupied;
+} Hook;
+
+typedef struct HookScope {
+    Hook* hook;
+    int veto;
+    struct HookScope* previous;
+} HookScope;
+
+
+// move to roseapi.h later
+enum {
+    HOOK_LOGIC,
+    HOOK_COUNT
+};
+
 #endif

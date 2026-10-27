@@ -17,5 +17,51 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <frida-gum.h>
+#include "hooks.h"
+#include "engine.h"
 
 GumInterceptor* g_interceptor = NULL;
+
+Hook hooks[HOOK_COUNT];
+
+static HookScope* current_scope = NULL;
+
+static void pushscope(HookScope *scope, int hookidx)
+{
+    scope->hook = &hooks[hookidx];
+    scope->hook->occupied = 1;
+    scope->veto = 0;
+    scope->previous = current_scope;
+    current_scope = scope;
+}
+
+static void popscope(void)
+{
+    if (current_scope)
+    {
+        current_scope->hook->occupied = 0;
+        current_scope = current_scope->previous;
+    }
+}
+
+static void logichook(void)
+{
+    HookScope scope;
+    pushscope(&scope, HOOK_LOGIC);
+    Hook* hook = scope.hook;
+    logicSimulation_ft trampoline = hook->trampoline;
+    trampoline();
+    popscope();
+    return;
+}
+
+int setuphooks(void)
+{
+    for (int i = 0; i < HOOK_COUNT; i++)
+    {
+        hooks[i].pre = g_ptr_array_new_with_free_func(free);
+        hooks[i].post = g_ptr_array_new_with_free_func(free);
+    }
+    INTERCEPT(HOOK_LOGIC, logicSimulation, logichook);
+    return 1;
+}
