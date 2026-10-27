@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <stdint.h>
+#include "cli.h"
 #include "engine.h"
 #include <frida-gum.h>
 #include "macro.h"
@@ -24,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 static int initialize(void)
 {
-    if (!setuphooks()) return 0;
+    if (!setuphooks() || !setupcli()) return 0;
     return 1;
 }
 

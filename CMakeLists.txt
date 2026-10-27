@@ -35,7 +35,7 @@ if(NOT EXISTS "${FRIDA_GUM_DEVKIT_DIR}/frida-gum.h" OR NOT EXISTS "${FRIDA_GUM_D
 endif()
 
 find_path(TCC_INCLUDE_DIR libtcc.h HINTS "/usr/local/include" REQUIRED)
-find_library(TCC_LIBRARY NAMES tcc HINTS "/usr/local/include" REQUIRED)
+find_library(TCC_LIBRARY NAMES tcc HINTS "/usr/local/lib" REQUIRED)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -66,6 +66,7 @@ target_include_directories(RoseAPI
 target_link_libraries(RoseAPI PRIVATE
     "${FRIDA_GUM_DEVKIT_DIR}/libfrida-gum.a"
     "${TCC_LIBRARY}"
+    PkgConfig::READLINE
     dl m rt pthread
 )
 
