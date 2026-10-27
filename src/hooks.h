@@ -19,33 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef HOOKS_H
 #define HOOKS_H
 
-#include "plugin/plugin.h"
 #include <frida-gum.h>
-#include <roseapi.h>
 
 extern GumInterceptor* g_interceptor;
-int setupHooks(void);
-
-#define INTERCEPT(idx, func, replace) gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].trampoline, NULL)
-
-typedef struct {
-    void* callback;
-    Plugin* owner;
-} HookCallback;
-
-typedef struct {
-    gpointer trampoline;
-    GPtrArray* pre;
-    GPtrArray* post;
-    int occupied;
-} Hook;
-
-typedef struct HookScope {
-    Hook *hook;
-    int veto;
-    struct HookScope *previous;
-} HookScope;
-
-extern Hook hooks[HOOK_COUNT];
 
 #endif

@@ -17,16 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <stdint.h>
-#include "cli.h"
 #include "engine.h"
 #include <frida-gum.h>
-#include "hooks.h"
 #include "macro.h"
-#include "plugin/plugin.h"
+#include "hooks.h"
 
 static int initialize(void)
 {
-    if (!setupHooks() || !setupPlugins() || !setupcli()) return 0;
     return 1;
 }
 
