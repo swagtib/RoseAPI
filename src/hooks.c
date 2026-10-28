@@ -22,12 +22,42 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "cli.h"
 #include "engine.h"
 #include "plugin/plugin.h"
+#include "roseapi.h"
+#include "bootstrap.h"
 
 GumInterceptor* g_interceptor = NULL;
 
 Hook hooks[HOOK_COUNT];
 
 static HookScope* current_scope = NULL;
+
+int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
+{
+    if (!ctx || !callback) return 0;
+    if (current_scope != NULL) return 0;
+    if (!pthread_equal(pthread_self(), gamethread)) return 0;
+    if (h >= HOOK_COUNT || h < 0) return 0;
+    if (!pluginisregistered(ctx)) return 0;
+    if (flags & FLAG_HOOK_PRE && flags & FLAG_HOOK_POST) return 0;
+    if (!(flags & (FLAG_HOOK_PRE | FLAG_HOOK_POST)))
+    {
+        flags |= FLAG_HOOK_PRE;
+    }
+    Hook* hook = &hooks[h];
+    GPtrArray* array = NULL;
+    if (flags & FLAG_HOOK_PRE) array = hook->pre;
+    if (flags & FLAG_HOOK_POST) array = hook->post;
+    if (!array) return 0;
+    HookCallback* hcall = malloc(sizeof(HookCallback));
+    if (!hcall) return 0;
+    hcall->callback = callback;
+    hcall->plugin = ctx;
+    if (flags & FLAG_HOOK_PRIORITY)
+    {
+        g_ptr_array_insert(array, 0, hcall);
+    } else g_ptr_array_add(array, hcall);
+    return 1;
+}
 
 static void pushscope(HookScope *scope, int hookidx)
 {
@@ -87,8 +117,26 @@ static void logichook(void)
     }
     HookScope scope;
     pushscope(&scope, HOOK_LOGIC);
-    logicSimulation_ft trampoline = scope.hook->trampoline;
-    trampoline();
+    Hook* hook = scope.hook;
+    for (int i = 0; i < hook->pre->len; i++)
+    {
+        HookCallback* hcall = g_ptr_array_index(hook->pre, i);
+        if (!hcall) continue;
+        logicSimulation_ft func = hcall->callback;
+        func();
+    }
+    if (!scope.veto)
+    {
+        logicSimulation_ft trampoline = hook->trampoline;
+        trampoline();
+        for (int i = 0; i < hook->post->len; i++)
+        {
+            HookCallback* hcall = g_ptr_array_index(hook->post, i);
+            if (!hcall) continue;
+            logicSimulation_ft func = hcall->callback;
+            func();
+        }
+    }
     popscope();
     return;
 }

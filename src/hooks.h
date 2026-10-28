@@ -47,12 +47,6 @@ typedef struct HookScope {
     struct HookScope* previous;
 } HookScope;
 
-
-// move to roseapi.h later
-enum {
-    HOOK_LOGIC,
-    HOOK_COUNT
-};
 extern Hook hooks[HOOK_COUNT];
 
 #endif

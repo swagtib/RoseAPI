@@ -34,8 +34,8 @@ if(NOT EXISTS "${FRIDA_GUM_DEVKIT_DIR}/frida-gum.h" OR NOT EXISTS "${FRIDA_GUM_D
     message(FATAL_ERROR "frida-gum.h / libfrida-gum.a not found")
 endif()
 
-find_path(TCC_INCLUDE_DIR libtcc.h HINTS "/usr/local/include" REQUIRED)
-find_library(TCC_LIBRARY NAMES tcc HINTS "/usr/local/lib" REQUIRED)
+find_path(TCC_INCLUDE_DIR libtcc.h REQUIRED)
+find_library(TCC_LIBRARY NAMES tcc REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LibEdit REQUIRED IMPORTED_TARGET libedit)

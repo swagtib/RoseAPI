@@ -30,6 +30,16 @@ typedef void (*CLICallback)(int argc, char **args);
 #define ARGSCLI int argc, char **args
 ROSEAPI int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
 
+/*HOOKING*/
+enum {
+    HOOK_LOGIC,
+    HOOK_COUNT
+};
+#define FLAG_HOOK_PRE (1u << 0)
+#define FLAG_HOOK_POST (1u << 1)
+#define FLAG_HOOK_PRIORITY (1u << 2)
+ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback);
+
 typedef struct {
     float x;
     float y;
