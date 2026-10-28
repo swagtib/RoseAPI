@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef HOOKS_H
 #define HOOKS_H
 
+#include "plugin/plugin.h"
 #include <frida-gum.h>
 
 extern GumInterceptor* g_interceptor;
@@ -29,7 +30,7 @@ int setuphooks(void);
 
 typedef struct {
     void* callback;
-    //Plugin* plugin;
+    Plugin* plugin;
 } HookCallback;
 
 typedef struct {
@@ -51,5 +52,6 @@ enum {
     HOOK_LOGIC,
     HOOK_COUNT
 };
+extern Hook hooks[HOOK_COUNT];
 
 #endif

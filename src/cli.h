@@ -19,9 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef CLI_H
 #define CLI_H
+#include "plugin/plugin.h"
 #include <frida-gum.h>
 
 typedef void (*CLICallback)(int argc, char **args);
+#define ARGSCLI int argc, char **args
 
 int setupcli(void);
 void executedcmd_free(void *ptr);
@@ -33,7 +35,7 @@ typedef struct {
 
 typedef struct {
     CLICallback callback;
-    //Plugin* plugin;
+    Plugin* plugin;
 } Command;
 
 extern GAsyncQueue* commandqueue;

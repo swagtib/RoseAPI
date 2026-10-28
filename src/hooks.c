@@ -59,7 +59,8 @@ static void logichook(void)
     }
     HookScope scope;
     pushscope(&scope, HOOK_LOGIC);
-
+    logicSimulation_ft trampoline = scope.hook->trampoline;
+    trampoline();
     popscope();
     return;
 }

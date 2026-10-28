@@ -22,10 +22,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <frida-gum.h>
 #include "macro.h"
 #include "hooks.h"
+#include "plugin/plugin.h"
+
+pthread_t gamethread;
 
 static int initialize(void)
 {
-    if (!setuphooks() || !setupcli()) return 0;
+    if (!setuphooks() || !setupcli() || !setupPlugins()) return 0;
+    gamethread = pthread_self();
     return 1;
 }
 
