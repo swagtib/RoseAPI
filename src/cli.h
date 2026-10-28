@@ -26,7 +26,7 @@ typedef void (*CLICallback)(int argc, char **args);
 #define ARGSCLI int argc, char **args
 
 int setupcli(void);
-void executedcmd_free(void *ptr);
+void freeplugincommands(Plugin* ptr);
 
 typedef struct {
     char **argv;

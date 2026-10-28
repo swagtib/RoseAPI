@@ -21,13 +21,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <frida-gum.h>
 
 typedef void* PluginContext;
-typedef void (*PluginEntry)(PluginContext ctx);
 
 int setupPlugins(void);
 
 typedef struct {
+    char *name;
     void *state;
-    PluginEntry entry;
+    void (*entry)(PluginContext ctx);
+    void (*unload)(void *state);
 } Plugin;
 
 extern GHashTable* plugins;

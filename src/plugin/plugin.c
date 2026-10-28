@@ -17,61 +17,113 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "plugin.h"
+#include <frida-gum.h>
+#include <libtcc.h>
+#include <stdlib.h>
 #include "cli.h"
 #include "hooks.h"
-#include <frida-gum.h>
-#include <stdlib.h>
-#include <libtcc.h>
 
 GHashTable* plugins;
 
-Plugin* constructplugin(void)
+Plugin* constructplugin(const char *name)
 {
     Plugin* plugin = malloc(sizeof(Plugin));
+    if (!plugin) return NULL;
     memset(plugin, 0x0, sizeof(Plugin));
+    plugin->name = strdup(name);
+    if (!plugin->name)
+    {
+        free(plugin);
+        return NULL;
+    }
     return plugin;
 }
 
-void destructplugin(void *ptr)
+void destroyplugin(void* ptr)
 {
     if (!ptr) return;
     Plugin* plugin = ptr;
-    for (int i = 0; i < HOOK_COUNT; i++)
+    freepluginhooks(ptr);
+    freeplugincommands(ptr);
+    if (plugin->unload) plugin->unload(plugin->state);
+    free(plugin->name);
+    free(plugin);
+}
+
+static void destroycstate(void *state)
+{
+    if (state) tcc_delete(state);
+    return;
+}
+
+static int loadCPlugin(Plugin* ptr, const char *path)
+{
+    if (!ptr || !path) return 0;
+    TCCState* state = tcc_new();
+    if (!state) return 0;
+    if (tcc_set_output_type(state, TCC_OUTPUT_MEMORY) != 0) goto cleanup;
+    if (tcc_add_file(state, path) != 0) goto cleanup;
+    if (tcc_relocate(state) != 0) goto cleanup;
+    void *entry = tcc_get_symbol(state, "plugin_init");
+    if (!entry) goto cleanup;
+    ptr->entry = entry;
+    ptr->state = state;
+    ptr->unload = destroycstate;
+    return 1;
+    cleanup:
+    tcc_delete(state);
+    return 0;
+}
+
+static int loadplugin(const char *name)
+{
+    if (g_hash_table_contains(plugins, name)) return 0;
+    const char *ext = strrchr(name, '.');
+    if (!ext) return 0;
+    Plugin* plugin = constructplugin(name);
+    if (!plugin) return 0;
+    char *path;
+    if (asprintf(&path, "plugins/%s", name) == -1)
     {
-        Hook* currenthook = &hooks[i];
-        for (int j = (int)currenthook->pre->len - 1; j >= 0; j--)
-        {
-            HookCallback* hcall = g_ptr_array_index(currenthook->pre, j);
-            if (hcall && hcall->plugin == plugin)
-            {
-                g_ptr_array_remove_index(currenthook->pre, j);
-            }
-        }
-        for (int j = (int)currenthook->post->len - 1; j >= 0; j--)
-        {
-            HookCallback* hcall = g_ptr_array_index(currenthook->post, j);
-            if (hcall && hcall->plugin == plugin)
-            {
-                g_ptr_array_remove_index(currenthook->post, j);
-            }
-        }
+        destroyplugin(plugin);
+        return 0;
     }
-    GHashTableIter iter;
-    gpointer key, val;
-    g_hash_table_iter_init(&iter, commands);
-    while (g_hash_table_iter_next(&iter, &key, &val))
+
+    int ok = 0;
+    if (strcmp(ext, ".c") == 0) ok = loadCPlugin(plugin, path);
+
+    free(path);
+    if (!ok)
     {
-        Command* cmd = val;
-        if (cmd && cmd->plugin == plugin)
-        {
-            g_hash_table_iter_remove(&iter);
-        }
+        destroyplugin(plugin);
+        return 0;
     }
-    free(ptr);
+    g_hash_table_insert(plugins, plugin->name, plugin);
+    plugin->entry(plugin);
+    return 1;
+}
+
+static void enableplugin(ARGSCLI)
+{
+    if (argc <= 0) return;
+    loadplugin(args[0]);
+}
+
+static void disableplugin(ARGSCLI)
+{
+    if (argc <= 0) return;
+    g_hash_table_remove(plugins, args[0]);
 }
 
 int setupPlugins(void)
 {
-    plugins = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, free, destructplugin);
+    plugins = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, NULL, destroyplugin);
+    Command* cmd1 = malloc(sizeof(Command));
+    Command* cmd2 = malloc(sizeof(Command));
+    if (!cmd1 || !cmd2) return 0;
+    cmd1->callback = enableplugin;
+    cmd2->callback = disableplugin;
+    g_hash_table_insert(commands, "enableplugin", cmd1);
+    g_hash_table_insert(commands, "disableplugin", cmd2);
     return 1;
 }

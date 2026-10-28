@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "cli.h"
+#include "plugin/plugin.h"
 #include <pthread.h>
 #include <frida-gum.h>
 #include <editline/readline.h>
@@ -54,11 +55,20 @@ static void* clihandler(void *arg)
     return NULL;
 }
 
-void executedcmd_free(void *ptr)
+void freeplugincommands(Plugin* ptr)
 {
-    ExecutedCommand* exec = ptr;
-    g_strfreev(exec->argv);
-    free(exec);
+    if (!ptr) return;
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, commands);
+    while (g_hash_table_iter_next(&iter, &key, &value))
+    {
+        Command* cmd = value;
+        if (cmd->plugin == ptr)
+        {
+            g_hash_table_iter_remove(&iter);
+        }
+    }
 }
 
 int setupcli(void)

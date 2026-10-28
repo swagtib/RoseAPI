@@ -17,9 +17,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include <frida-gum.h>
+#include <stdlib.h>
 #include "hooks.h"
 #include "cli.h"
 #include "engine.h"
+#include "plugin/plugin.h"
 
 GumInterceptor* g_interceptor = NULL;
 
@@ -45,6 +47,31 @@ static void popscope(void)
     }
 }
 
+void freepluginhooks(Plugin* ptr)
+{
+    for (int i = 0; i < HOOK_COUNT; i++)
+    {
+        Hook* curhook = &hooks[i];
+        for (int j = curhook->pre->len - 1; j >= 0; j--)
+        {
+            HookCallback* hcall = g_ptr_array_index(curhook->pre, j);
+            if (hcall && hcall->plugin == ptr)
+            {
+                g_ptr_array_remove_index(curhook->pre, j);
+            }
+        }
+
+        for (int j = curhook->post->len - 1; j >= 0; j--)
+        {
+            HookCallback* hcall = g_ptr_array_index(curhook->post, j);
+            if (hcall && hcall->plugin == ptr)
+            {
+                g_ptr_array_remove_index(curhook->post, j);
+            }
+        }
+    }
+}
+
 static void logichook(void)
 {
     ExecutedCommand* exec;
@@ -55,7 +82,8 @@ static void logichook(void)
             Command* cmd = g_hash_table_lookup(commands, exec->argv[0]);
             cmd->callback(exec->argc - 1, &exec->argv[1]);
         }
-        executedcmd_free(exec);
+        g_strfreev(exec->argv);
+        free(exec);
     }
     HookScope scope;
     pushscope(&scope, HOOK_LOGIC);

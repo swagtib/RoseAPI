@@ -25,6 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 extern GumInterceptor* g_interceptor;
 
 int setuphooks(void);
+void freepluginhooks(Plugin* ptr);
 
 #define INTERCEPT(idx, func, replace) gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].trampoline, NULL)
 
