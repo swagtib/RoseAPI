@@ -19,7 +19,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef CLI_H
 #define CLI_H
+#include <frida-gum.h>
+
+typedef void (*CLICallback)(int argc, char **args);
 
 int setupcli(void);
+void executedcmd_free(void *ptr);
+
+typedef struct {
+    char **argv;
+    int argc;
+} ExecutedCommand;
+
+typedef struct {
+    CLICallback callback;
+    //Plugin* plugin;
+} Command;
+
+extern GAsyncQueue* commandqueue;
+extern GHashTable* commands;
 
 #endif

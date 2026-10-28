@@ -3,3 +3,4 @@ build/
 bin/
 .cache/
 .vscode/
+auto.sh

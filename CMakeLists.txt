@@ -37,6 +37,9 @@ endif()
 find_path(TCC_INCLUDE_DIR libtcc.h HINTS "/usr/local/include" REQUIRED)
 find_library(TCC_LIBRARY NAMES tcc HINTS "/usr/local/lib" REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LibEdit REQUIRED IMPORTED_TARGET libedit)
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
@@ -66,7 +69,7 @@ target_include_directories(RoseAPI
 target_link_libraries(RoseAPI PRIVATE
     "${FRIDA_GUM_DEVKIT_DIR}/libfrida-gum.a"
     "${TCC_LIBRARY}"
-    PkgConfig::READLINE
+    PkgConfig::LibEdit
     dl m rt pthread
 )
 

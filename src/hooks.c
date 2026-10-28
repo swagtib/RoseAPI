@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <frida-gum.h>
 #include "hooks.h"
+#include "cli.h"
 #include "engine.h"
 
 GumInterceptor* g_interceptor = NULL;
@@ -46,11 +47,19 @@ static void popscope(void)
 
 static void logichook(void)
 {
+    ExecutedCommand* exec;
+    while ((exec = g_async_queue_try_pop(commandqueue)) != NULL)
+    {
+        if (g_hash_table_contains(commands, exec->argv[0]))
+        {
+            Command* cmd = g_hash_table_lookup(commands, exec->argv[0]);
+            cmd->callback(exec->argc - 1, &exec->argv[1]);
+        }
+        executedcmd_free(exec);
+    }
     HookScope scope;
     pushscope(&scope, HOOK_LOGIC);
-    Hook* hook = scope.hook;
-    logicSimulation_ft trampoline = hook->trampoline;
-    trampoline();
+
     popscope();
     return;
 }
@@ -62,6 +71,6 @@ int setuphooks(void)
         hooks[i].pre = g_ptr_array_new_with_free_func(free);
         hooks[i].post = g_ptr_array_new_with_free_func(free);
     }
-    INTERCEPT(HOOK_LOGIC, logicSimulation, logichook);
+    INTERCEPT(HOOK_LOGIC, logicSimulation, logichook); // fix  when i make program more verbose
     return 1;
 }
