@@ -19,8 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef PLUGIN_H
 #define PLUGIN_H
 #include <frida-gum.h>
-
-typedef void* PluginContext;
+#include <roseapi.h>
 
 int setupPlugins(void);
 
@@ -32,5 +31,6 @@ typedef struct {
 } Plugin;
 
 extern GHashTable* plugins;
+int pluginisregistered(Plugin* plugin);
 
 #endif

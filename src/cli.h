@@ -21,9 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define CLI_H
 #include "plugin/plugin.h"
 #include <frida-gum.h>
-
-typedef void (*CLICallback)(int argc, char **args);
-#define ARGSCLI int argc, char **args
+#include <roseapi.h>
 
 int setupcli(void);
 void freeplugincommands(Plugin* ptr);

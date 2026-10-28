@@ -115,6 +115,21 @@ static void disableplugin(ARGSCLI)
     g_hash_table_remove(plugins, args[0]);
 }
 
+int pluginisregistered(Plugin* plugin)
+{
+    GHashTableIter iter;
+    gpointer val;
+    g_hash_table_iter_init(&iter, plugins);
+    while (g_hash_table_iter_next(&iter, NULL, &val))
+    {
+        if (val == plugin)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int setupPlugins(void)
 {
     plugins = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, NULL, destroyplugin);

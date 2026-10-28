@@ -20,6 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define BOOTSTRAP_H
 
 #include <stdint.h>
+#include <pthread.h>
 void bootstrapapi(uintptr_t base);
+
+extern pthread_t gamethread;
 
 #endif

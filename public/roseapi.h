@@ -21,6 +21,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define ROSEAPI __attribute__((visibility("default")))
 
+/*GENERAL*/
+typedef void* PluginContext;
+#define C_PROLOGUE plugin_init(PluginContext ctx)
+
+/*CLI COMMANDS*/
+typedef void (*CLICallback)(int argc, char **args);
+#define ARGSCLI int argc, char **args
+ROSEAPI int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
+
 typedef struct {
     float x;
     float y;

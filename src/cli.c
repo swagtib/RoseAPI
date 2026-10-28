@@ -18,10 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "cli.h"
 #include "plugin/plugin.h"
+#include "roseapi.h"
 #include <pthread.h>
 #include <frida-gum.h>
 #include <editline/readline.h>
 #include <stdlib.h>
+#include <string.h>
+#include "bootstrap.h"
 
 GAsyncQueue* commandqueue;
 GHashTable* commands;
@@ -69,6 +72,27 @@ void freeplugincommands(Plugin* ptr)
             g_hash_table_iter_remove(&iter);
         }
     }
+}
+
+int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
+{
+    if (!ctx || !name || !callback) return 0;
+    if (strchr(name, ' ') != NULL) return 0;
+    if (g_hash_table_contains(commands, name)) return 0;
+    if (!pthread_equal(pthread_self(), gamethread)) return 0;
+    if (!pluginisregistered(ctx)) return 0;
+    Command* cmd = malloc(sizeof(Command));
+    if (!cmd) return 0;
+    char *key = strdup(name);
+    if (!key)
+    {
+        free(cmd);
+        return 0;
+    }
+    cmd->callback = callback;
+    cmd->plugin = ctx;
+    g_hash_table_insert(commands, key, cmd);
+    return 1;
 }
 
 int setupcli(void)
