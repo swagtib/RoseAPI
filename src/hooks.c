@@ -115,7 +115,7 @@ static void logichook(void)
         {
             Command* cmd = g_hash_table_lookup(commands, exec->argv[0]);
             cmd->callback(exec->argc - 1, &exec->argv[1]);
-        }
+        } else roseapi_ferror("command '%s' doesn't exist", exec->argv[0]);
         g_strfreev(exec->argv);
         free(exec);
     }

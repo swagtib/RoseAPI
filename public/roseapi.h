@@ -48,6 +48,8 @@ ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback
 ROSEAPI void plugin_error(PluginContext ctx, const char *msg, ...);
 ROSEAPI void plugin_log(PluginContext ctx, const char *msg, ...);
 
+/*STRUCTURES*/
+
 typedef struct {
     float x;
     float y;
@@ -220,7 +222,7 @@ typedef struct {
     char __unkpad45[188];
     union {
         unsigned int computerCurrentLine;
-        unsigned int memoText;
+        unsigned int __memoText;
         int team;
     };
     unsigned int computerTopLine;
@@ -732,5 +734,36 @@ typedef struct {
     int color;
     char __unkpad79[32];
 } TrafficCar;
+
+/* VECTOR */
+
+void vectorcopy(Vector* copyto, Vector* copyfrom);
+void vectorzero(Vector* v);
+float vectorlengthsquared(Vector* v);
+void vectorset(Vector* v, float x, float y, float z);
+float vectorlength(Vector* v);
+void vectornormalize(Vector* v);
+int vectorincuboid(Vector* v, Vector* min, Vector* max);
+void vectorscale(Vector* v, float scalar);
+void vectorneg(Vector* v);
+void vectorsub(Vector* v, Vector* sub);
+void vectoradd(Vector* v, Vector* add);
+float vectordot(Vector* a, Vector* b);
+void vectorcross(Vector* result, Vector* a, Vector* b);
+float vectordistancesquared(Vector* a, Vector* b);
+float vectordistance(Vector* a, Vector* b);
+int vectorinsphere(Vector* point, Vector* center, float radius);
+void pitchtorotmatrix(RotMatrix *result, float pitch);
+void yawtorotmatrix(RotMatrix *result, float yaw);
+void rolltorotmatrix(RotMatrix *result, float roll);
+void vectorrotate(Vector *v, RotMatrix *r);
+void rotmatrixmul(RotMatrix* result, RotMatrix* a, RotMatrix* b);
+void eulertorotmatrix(RotMatrix* result, Vector* euler);
+void vectorlerp(Vector* result, Vector *a, Vector *b, float t);
+int vectorequals(Vector* a, Vector* b, float epsilon);
+void vectorsetlength(Vector* v, float length);
+void rotmatrixtranspose(RotMatrix* result, RotMatrix* m);
+void vectorrotateinverse(Vector *vec, RotMatrix *m);
+void rotmatrixtoeuler(Vector* result, RotMatrix* r);
 
 #endif
