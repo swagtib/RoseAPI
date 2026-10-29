@@ -203,38 +203,4 @@ extern serverSendConnectResponse_ft serverSendConnectResponse;
 extern serverSend_ft serverSend;
 extern serverReceive_ft serverReceive;
 
-
-extern RigidBody* bodies;
-extern Connection* connections;
-extern Account* accounts;
-extern VehicleType* vehicleTypes;
-extern Event* events;
-extern Item* items;
-extern Voice* voices;
-extern Human* humans;
-extern unsigned int* sunTime;
-extern Player* players;
-extern Vehicle* vehicles;
-extern Bond* bonds;
-extern unsigned char* packet;
-extern int* isLevelLoaded;
-extern unsigned int* numStreetIntersections;
-extern StreetIntersection* streetIntersections;
-extern unsigned int* numStreets;
-extern Street* streets;
-extern unsigned int* numBuildings;
-extern Building* buildings;
-extern Bullet* bullets;
-extern int* Round_weekDay;
-extern int* roundNumber;
-extern int* gameState;
-extern int* gameTimer;
-extern int* ticksSinceReset;
-extern Corporation* corporations;
-extern unsigned int* numBullets;
-extern unsigned short* numEvents;
-extern unsigned int* numConnections;
-extern LineIntersectResult* lineIntersectResult;
-extern ItemType* itemTypes;
-extern TrafficCar* trafficCars;
 #endif

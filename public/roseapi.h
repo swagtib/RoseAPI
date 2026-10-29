@@ -735,6 +735,7 @@ typedef struct {
     char __unkpad79[32];
 } TrafficCar;
 
+/*SERVER OPTIONS*/
 typedef struct {
     float* gravity;
     unsigned int* subVersion;
@@ -776,8 +777,48 @@ typedef struct {
         } Crime;
     } World;
 } ServerOpt;
-
 extern ServerOpt ServerOptions;
+
+/*GAME STATUS*/
+typedef struct {
+    unsigned int* sunTime;
+    unsigned char* packet;
+    int* isLevelLoaded;
+    unsigned int* numStreetIntersections;
+    unsigned int* numStreets;
+    unsigned int* numBuildings;
+    int* RoundweekDay;
+    int* roundNumber;
+    int* gameState;
+    int* gameTimer;
+    int* ticksSinceReset;
+    unsigned int* numBullets;
+    unsigned short* numEvents;
+    unsigned int* numConnections;
+} GameOpt;
+
+extern GameOpt GameStatus;
+
+/*GLOBALS*/
+extern RigidBody* bodies;
+extern Connection* connections;
+extern Account* accounts;
+extern VehicleType* vehicleTypes;
+extern Event* events;
+extern Item* items;
+extern Voice* voices;
+extern Human* humans;
+extern Player* players;
+extern Vehicle* vehicles;
+extern Bond* bonds;
+extern StreetIntersection* streetIntersections;
+extern Street* streets;
+extern Building* buildings;
+extern Bullet* bullets;
+extern Corporation* corporations;
+extern LineIntersectResult* lineIntersectResult;
+extern ItemType* itemTypes;
+extern TrafficCar* trafficCars;
 
 /* VECTOR */
 
