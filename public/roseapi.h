@@ -737,33 +737,33 @@ typedef struct {
 
 /* VECTOR */
 
-void vectorcopy(Vector* copyto, Vector* copyfrom);
-void vectorzero(Vector* v);
-float vectorlengthsquared(Vector* v);
-void vectorset(Vector* v, float x, float y, float z);
-float vectorlength(Vector* v);
-void vectornormalize(Vector* v);
-int vectorincuboid(Vector* v, Vector* min, Vector* max);
-void vectorscale(Vector* v, float scalar);
-void vectorneg(Vector* v);
-void vectorsub(Vector* v, Vector* sub);
-void vectoradd(Vector* v, Vector* add);
-float vectordot(Vector* a, Vector* b);
-void vectorcross(Vector* result, Vector* a, Vector* b);
-float vectordistancesquared(Vector* a, Vector* b);
-float vectordistance(Vector* a, Vector* b);
-int vectorinsphere(Vector* point, Vector* center, float radius);
-void pitchtorotmatrix(RotMatrix *result, float pitch);
-void yawtorotmatrix(RotMatrix *result, float yaw);
-void rolltorotmatrix(RotMatrix *result, float roll);
-void vectorrotate(Vector *v, RotMatrix *r);
-void rotmatrixmul(RotMatrix* result, RotMatrix* a, RotMatrix* b);
-void eulertorotmatrix(RotMatrix* result, Vector* euler);
-void vectorlerp(Vector* result, Vector *a, Vector *b, float t);
-int vectorequals(Vector* a, Vector* b, float epsilon);
-void vectorsetlength(Vector* v, float length);
-void rotmatrixtranspose(RotMatrix* result, RotMatrix* m);
-void vectorrotateinverse(Vector *vec, RotMatrix *m);
-void rotmatrixtoeuler(Vector* result, RotMatrix* r);
+ROSEAPI void vectorcopy(Vector* copyto, Vector* copyfrom);
+ROSEAPI void vectorzero(Vector* v);
+ROSEAPI float vectorlengthsquared(Vector* v);
+ROSEAPI void vectorset(Vector* v, float x, float y, float z);
+ROSEAPI float vectorlength(Vector* v);
+ROSEAPI void vectornormalize(Vector* v);
+ROSEAPI int vectorincuboid(Vector* v, Vector* min, Vector* max);
+ROSEAPI void vectorscale(Vector* v, float scalar);
+ROSEAPI void vectorneg(Vector* v);
+ROSEAPI void vectorsub(Vector* v, Vector* sub);
+ROSEAPI void vectoradd(Vector* v, Vector* add);
+ROSEAPI float vectordot(Vector* a, Vector* b);
+ROSEAPI void vectorcross(Vector* result, Vector* a, Vector* b);
+ROSEAPI float vectordistancesquared(Vector* a, Vector* b);
+ROSEAPI float vectordistance(Vector* a, Vector* b);
+ROSEAPI int vectorinsphere(Vector* point, Vector* center, float radius);
+ROSEAPI void pitchtorotmatrix(RotMatrix *result, float pitch);
+ROSEAPI void yawtorotmatrix(RotMatrix *result, float yaw);
+ROSEAPI void rolltorotmatrix(RotMatrix *result, float roll);
+ROSEAPI void vectorrotate(Vector *v, RotMatrix *r);
+ROSEAPI void rotmatrixmul(RotMatrix* result, RotMatrix* a, RotMatrix* b);
+ROSEAPI void eulertorotmatrix(RotMatrix* result, Vector* euler);
+ROSEAPI void vectorlerp(Vector* result, Vector *a, Vector *b, float t);
+ROSEAPI int vectorequals(Vector* a, Vector* b, float epsilon);
+ROSEAPI void vectorsetlength(Vector* v, float length);
+ROSEAPI void rotmatrixtranspose(RotMatrix* result, RotMatrix* m);
+ROSEAPI void vectorrotateinverse(Vector *vec, RotMatrix *m);
+ROSEAPI void rotmatrixtoeuler(Vector* result, RotMatrix* r);
 
 #endif
