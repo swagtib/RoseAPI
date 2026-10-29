@@ -34,26 +34,10 @@ static HookScope* current_scope = NULL;
 int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
 {
     if (!plugincheckcontext(ctx)) return 0;
-    if (current_scope != NULL)
-    {
-        plugin_error(ctx, "cannot create hook while a hook is active");
-        return 0;
-    }
-    if (!pthread_equal(pthread_self(), gamethread))
-    {
-        plugin_error(ctx, "cannot create hook from other threads");
-        return 0;
-    }
-    if (!callback)
-    {
-        plugin_error(ctx, "provide a hook callback");
-        return 0;
-    }
-    if (h >= HOOK_COUNT || h < 0)
-    {
-        plugin_error(ctx, "invalid hook index");
-        return 0;
-    }
+    if (current_scope != NULL) {plugin_error(ctx, "cannot create hook while a hook is active"); return 0;}
+    if (!pthread_equal(pthread_self(), gamethread)) {plugin_error(ctx, "cannot create hook from other threads"); return 0;}
+    if (!callback) {plugin_error(ctx, "provide a hook callback"); return 0;}
+    if (h >= HOOK_COUNT || h < 0) { plugin_error(ctx, "invalid hook index"); return 0; }
     if ((flags & FLAG_HOOK_PRE) && flags & (FLAG_HOOK_POST))
     {
         plugin_error(ctx, "cannot place hook on both pre & post");
@@ -69,7 +53,7 @@ int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
     if (flags & FLAG_HOOK_POST) array = hook->post;
     if (!array) return 0;
     HookCallback* hcall = malloc(sizeof(HookCallback));
-    if (!hcall) return 0;
+    if (!hcall) {roseapi_error("failed allocation of hcall"); return 0;};
     hcall->callback = callback;
     hcall->plugin = ctx;
     if (flags & FLAG_HOOK_PRIORITY)

@@ -25,6 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include "bootstrap.h"
+#include "macro.h"
 
 GAsyncQueue* commandqueue;
 GHashTable* commands;
@@ -42,7 +43,8 @@ static void* clihandler(void *arg)
         if (line[0] != '\0')
         {
             add_history(line);
-            if (g_shell_parse_argv(line, &argc, &argv, NULL))
+            GError* gerr = NULL;
+            if (g_shell_parse_argv(line, &argc, &argv, &gerr))
             {
                 ExecutedCommand* cmd = malloc(sizeof(ExecutedCommand));
                 if (cmd)
@@ -52,6 +54,7 @@ static void* clihandler(void *arg)
                     g_async_queue_push(commandqueue, cmd);
                 } else g_strfreev(argv);
             }
+            if (gerr) {roseapi_gerror(gerr); g_error_free(gerr);}
         }
         free(line);
     }
@@ -77,31 +80,16 @@ void freeplugincommands(Plugin* ptr)
 int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
 {
     if (!plugincheckcontext(ctx)) return 0;
-    if (!name || !callback)
-    {
-        plugin_error(ctx, "must provide name and/or callback");
-        return 0;
-    }
-    if (strchr(name, ' ') != NULL)
-    {
-        plugin_error(ctx, "cli command name cannot contain spaces");
-        return 0;
-    }
-    if (g_hash_table_contains(commands, name))
-    {
-        plugin_error(ctx, "command '%s' is already registered", name);
-        return 0;
-    }
-    if (!pthread_equal(pthread_self(), gamethread))
-    {
-        plugin_error(ctx, "cannot create command from non-game thread");
-        return 0;
-    }
+    if (!name || !callback) {plugin_error(ctx, "must provide name and/or callback"); return 0;}
+    if (strchr(name, ' ') != NULL) {plugin_error(ctx, "cli command name cannot contain spaces"); return 0;}
+    if (g_hash_table_contains(commands, name)) {plugin_error(ctx, "command '%s' is already registered", name); return 0;}
+    if (!pthread_equal(pthread_self(), gamethread)) {plugin_error(ctx, "cannot create command from non-game thread"); return 0;}
     Command* cmd = malloc(sizeof(Command));
     if (!cmd) return 0;
     char *key = strdup(name);
     if (!key)
     {
+        roseapi_error("failed strdup");
         free(cmd);
         return 0;
     }
