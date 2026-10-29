@@ -735,6 +735,50 @@ typedef struct {
     char __unkpad79[32];
 } TrafficCar;
 
+typedef struct {
+    float* gravity;
+    unsigned int* subVersion;
+    unsigned int* version;
+    int* identifier;
+    unsigned int* numTrafficCars;
+    unsigned int* serverPort;
+    int* serverMaxBytesPerSecond;
+    char* adminPassword;
+    char* password;
+    char* serverName;
+    int* isPassworded;
+    int* maxPlayers;
+    int* serverSocketEnabled;
+    int* packetSize;
+    char* loadedMapName;
+    int* gameType;
+    char* mapName;
+    struct {
+        int* roundTime;
+        int* startCash;
+        unsigned char* weekly;
+        unsigned char* bonusRatio;
+        int* teamDamage;
+    } Round;
+    struct {
+        int* traffic;
+        int* startCash;
+        int* minCash;
+        unsigned char* showJoinExit;
+        unsigned char* respawnTeam;
+        struct {
+            int* civToCiv;
+            int* civToTeam;
+            int* teamToCiv;
+            int* teamToTeam;
+            int* teamToTeamInBase;
+            int* noSpawn;
+        } Crime;
+    } World;
+} ServerOpt;
+
+extern ServerOpt ServerOptions;
+
 /* VECTOR */
 
 ROSEAPI void vectorcopy(Vector* copyto, Vector* copyfrom);
