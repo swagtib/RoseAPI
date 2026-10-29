@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MACRO_H
 
 #include <stdlib.h>
+#include <frida-gum.h>
 
 #define STRINGIFY_HELPER(x) #x
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
@@ -28,11 +29,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define CONCAT(x, y) CONCAT_HELPER(x, y)
 #define ragequit exit(EXIT_FAILURE)
 
-void pretty_log(int log, const char* fmt, ...);
+// logs a format with variadic arguments
+void roseapi_log(const char *fmt, ...);
 
-enum {
-    LOG_INFO,
-    LOG_ERROR
-};
+// behaves the same as perror
+void roseapi_error(const char *msg);
+
+// logs an error format
+void roseapi_ferror(const char *fmt, ...);
+
+// logs a gerror
+void roseapi_gerror(GError *error);
+
+void tcc_error(void *opaque, const char *msg);
 
 #endif

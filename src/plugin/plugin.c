@@ -22,6 +22,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include "cli.h"
 #include "hooks.h"
+#include "macro.h"
+#include "roseapi.h"
 
 GHashTable* plugins;
 
@@ -128,6 +130,21 @@ int pluginisregistered(Plugin* plugin)
         }
     }
     return 0;
+}
+
+int plugincheckcontext(PluginContext ctx)
+{
+    if (!ctx)
+    {
+        roseapi_ferror("must provide context");
+        return 0;
+    }
+    if (!pluginisregistered(ctx))
+    {
+        roseapi_ferror("invalid context");
+        return 0;
+    }
+    return 1;
 }
 
 int setupPlugins(void)

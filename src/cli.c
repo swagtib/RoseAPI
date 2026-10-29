@@ -37,7 +37,7 @@ static void* clihandler(void *arg)
         char **argv;
         int argc;
         line = readline("roseapi> ");
-        if (line == NULL) exit(EXIT_SUCCESS);
+        if (line == NULL) break;
         g_strchomp(line);
         if (line[0] != '\0')
         {
@@ -76,11 +76,27 @@ void freeplugincommands(Plugin* ptr)
 
 int addclicommand(PluginContext ctx, const char *name, CLICallback callback)
 {
-    if (!ctx || !name || !callback) return 0;
-    if (strchr(name, ' ') != NULL) return 0;
-    if (g_hash_table_contains(commands, name)) return 0;
-    if (!pthread_equal(pthread_self(), gamethread)) return 0;
-    if (!pluginisregistered(ctx)) return 0;
+    if (!plugincheckcontext(ctx)) return 0;
+    if (!name || !callback)
+    {
+        plugin_error(ctx, "must provide name and/or callback");
+        return 0;
+    }
+    if (strchr(name, ' ') != NULL)
+    {
+        plugin_error(ctx, "cli command name cannot contain spaces");
+        return 0;
+    }
+    if (g_hash_table_contains(commands, name))
+    {
+        plugin_error(ctx, "command '%s' is already registered", name);
+        return 0;
+    }
+    if (!pthread_equal(pthread_self(), gamethread))
+    {
+        plugin_error(ctx, "cannot create command from non-game thread");
+        return 0;
+    }
     Command* cmd = malloc(sizeof(Command));
     if (!cmd) return 0;
     char *key = strdup(name);

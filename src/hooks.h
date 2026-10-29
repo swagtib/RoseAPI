@@ -21,13 +21,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "plugin/plugin.h"
 #include <frida-gum.h>
+#include "macro.h"
 
 extern GumInterceptor* g_interceptor;
 
 int setuphooks(void);
 void freepluginhooks(Plugin* ptr);
 
-#define INTERCEPT(idx, func, replace) gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].trampoline, NULL)
+#define INTERCEPT(idx, func, replace, err) \
+if ((err = gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].trampoline, NULL)) != GUM_REPLACE_OK) \
+{ \
+    roseapi_ferror("failed interception on %d error: %d", idx, err); \
+    return 0; \
+}
 
 typedef struct {
     void* callback;

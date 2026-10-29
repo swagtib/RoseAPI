@@ -26,15 +26,15 @@ void __attribute__((constructor)) start()
     GumModule* module = gum_process_get_main_module();
     if (!module)
     {
-        pretty_log(LOG_ERROR, "failed obtaining module\n");
+        roseapi_error("failed obtaining module");
         ragequit;
     }
     const GumMemoryRange* range = gum_module_get_range(module);
     if (!range)
     {
-        pretty_log(LOG_ERROR, "failed obtaining range\n");
+        roseapi_error("failed obtaining range");
         ragequit;
     }
-    pretty_log(LOG_INFO, "base address: %#lx\n", range->base_address);
+    roseapi_log("base address: %#lx", range->base_address);
     bootstrapapi(range->base_address);
 }

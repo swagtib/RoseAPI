@@ -33,4 +33,7 @@ typedef struct {
 extern GHashTable* plugins;
 int pluginisregistered(Plugin* plugin);
 
+// verbose way of checking if a plugin context is valid and registered
+int plugincheckcontext(PluginContext ctx);
+
 #endif

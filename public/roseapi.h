@@ -22,15 +22,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define ROSEAPI __attribute__((visibility("default")))
 
 /*GENERAL*/
+
 typedef void* PluginContext;
 #define C_PROLOGUE plugin_init(PluginContext ctx)
 
 /*CLI COMMANDS*/
+
 typedef void (*CLICallback)(int argc, char **args);
 #define ARGSCLI int argc, char **args
 ROSEAPI int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
 
 /*HOOKING*/
+
 enum {
     HOOK_LOGIC,
     HOOK_COUNT
@@ -39,6 +42,11 @@ enum {
 #define FLAG_HOOK_POST (1u << 1)
 #define FLAG_HOOK_PRIORITY (1u << 2)
 ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback);
+
+/*LOGGING*/
+
+ROSEAPI void plugin_error(PluginContext ctx, const char *msg, ...);
+ROSEAPI void plugin_log(PluginContext ctx, const char *msg, ...);
 
 typedef struct {
     float x;
