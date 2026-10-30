@@ -79,7 +79,7 @@ typedef struct LineIntersectResult LineIntersectResult;
 typedef struct ItemType ItemType;
 typedef struct TrafficCar TrafficCar;
 
-enum MaxNumberOf {
+typedef enum {
     MAX_ACCOUNTS = 32768,
     MAX_PLAYERS = 256,
     MAX_HUMANS = 256,
@@ -88,8 +88,9 @@ enum MaxNumberOf {
     MAX_VEHICLETYPES = 17,
     MAX_VEHICLES = 512,
     MAX_RIGIDBODIES = 8192,
-    MAX_BONDS = 16384
-};
+    MAX_BONDS = 16384,
+    MAX_CORPS = 32
+} MaxNumberOf;
 
 /*SERVER OPTIONS*/
 typedef struct {
@@ -175,6 +176,7 @@ typedef enum MenuTabIndex MenuTabIndex;
 typedef enum MissionLocationIndex MissionLocationIndex;
 typedef enum BulletHitTypeIndex BulletHitTypeIndex;
 typedef enum MessageTypeIndex MessageTypeIndex;
+typedef enum VehicleUpdateIndex VehicleUpdateIndex;
 
 /*GLOBALS*/
 extern ROSEAPI RigidBody* bodies;
@@ -227,6 +229,25 @@ ROSEAPI void rotmatrixtranspose(RotMatrix* result, RotMatrix* m);
 ROSEAPI void vectorrotateinverse(Vector *vec, RotMatrix *m);
 ROSEAPI void rotmatrixtoeuler(Vector* result, RotMatrix* r);
 
+/* API */
+ROSEAPI void bonddelete(int id);
+ROSEAPI void eventcreatebullet(BulletTypeIndex bt, Vector* pos, Vector* vel, int item);
+ROSEAPI void eventcreatebullethit(BulletHitTypeIndex bht, Vector* pos, Vector* normal);
+ROSEAPI void eventcreatemessage(MessageTypeIndex mt, char *m, int speaker, int dist);
+ROSEAPI void eventcreatevehicletypeupdate(int v);
+ROSEAPI void eventcreatevehicleupdate(int v, VehicleUpdateIndex u, int part, Vector* pos, Vector* hvel);
+ROSEAPI void eventcreateupdateitem(int i);
+ROSEAPI void eventcreateupdateplayer(int i, int finance);
+ROSEAPI void eventcreatesound(SoundIndex s, Vector* p, float vol, float pitch);
+ROSEAPI void eventcreatesounditem(SoundIndex s, int i, float vol, float pitch);
+ROSEAPI void eventcreateupdatecorp(int c, int opaque, int dm);
+ROSEAPI void eventcreateupdateelim(int p, int tracker, int team, int savior, Vector* saviorpos);
+ROSEAPI void eventcreateexplosion(Vector* pos);
+ROSEAPI void playergivewanted(int p, int victim, int basepoints);
+ROSEAPI void vehicledelete(int v);
+ROSEAPI void accountssave(void);
+ROSEAPI void humandelete(int h);
+ROSEAPI int humancreate(Vector* pos, RotMatrix* rot, int p);
 
 /* STRUCTURES */
 struct Vector {
@@ -1309,7 +1330,15 @@ enum MessageTypeIndex {
     MESSAGETYPE_MOTD,
     MESSAGETYPE_ADMINS,
     MESSAGETYPE_UNK,
-    MESSAGETYPE_CRIM
+    MESSAGETYPE_CRIM,
+    MESSAGETYPE_COUNT
+};
+
+enum VehicleUpdateIndex {
+    VEHICLEUPDATE_WINDOW,
+    VEHICLEUPDATE_TIRE,
+    VEHICLEUPDATE_BODY,
+    VEHICLEUPDATE_COUNT
 };
 
 #endif
