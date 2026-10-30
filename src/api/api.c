@@ -20,10 +20,82 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <roseapi.h>
 #include <string.h>
 
-void bonddelete(int id)
+int humancreate(Vector* pos, RotMatrix* rot, int p)
 {
-    if (!ISINRANGE(id, MAX_BONDS)) return;
-    deleteBond_game(id);
+    if (!pos || !rot) return -1;
+    if (!ISINRANGE(p, MAX_PLAYERS)) return -1;
+    int idx = createHuman_game(pos, rot, p);
+    return idx;
+}
+
+int itemcreate(ItemTypeIndex t, Vector* pos, Vector* vel, RotMatrix* rot)
+{
+    if (!pos || !vel || !rot) return -1;
+    if (!ISINRANGE(t, ITEMTYPE_COUNT)) return -1; // technically speaking i should be comparing against MAX_ITEMTYPES but this only allows defined IT's to go thru
+    int idx = createItem_game(t, pos, vel, rot);
+    return idx;
+}
+
+int vehiclecreate(VehicleTypeIndex vt, Vector* pos, Vector* vel, RotMatrix* rot, VehicleColorIndex c)
+{
+    if (!pos || !vel || !rot) return -1;
+    if (!ISINRANGE(vt, VEHICLETYPE_COUNT)) return -1; // same thing as itemcreate
+    if (!ISINRANGE(c, VEHICLECOLOR_COUNT)) return -1;
+    int idx = createVehicle_game(vt, pos, vel, rot, c);
+    return idx;
+}
+
+int playercreate(void)
+{
+    return createPlayer_game();
+}
+
+void playerdelete(int p)
+{
+    if (!ISINRANGE(p, MAX_PLAYERS)) return;
+    deletePlayer_game(p);
+}
+
+void humandelete(int h)
+{
+    if (!ISINRANGE(h, MAX_HUMANS)) return;
+    deleteHuman_game(h);
+}
+
+void itemdelete(int i)
+{
+    if (!ISINRANGE(i, MAX_ITEMS)) return;
+    deleteItem_game(i);
+}
+
+void vehicledelete(int v)
+{
+    if (!ISINRANGE(v, MAX_VEHICLES)) return;
+    deleteVehicle_game(v);
+}
+
+void humanapplydamage(int h, int bone, int damage)
+{
+    if (!ISINRANGE(h, MAX_HUMANS)) return;
+    humanApplyDamage_game(h, bone, 0, damage);
+}
+
+void vehicleapplydamage(int v, int d)
+{
+    if (!ISINRANGE(v, MAX_VEHICLES)) return;
+    vehicleApplyDamage_game(v, d);
+}
+
+int itemlink(int item, int child, int human, int slot)
+{
+    if (!ISINRANGE(item, MAX_ITEMS) || !ISINRANGE(child, MAX_ITEMS) || !ISINRANGE(human, MAX_HUMANS)) return -1; // possibly check slot too
+    return linkItem_game(item, child, human, slot);
+}
+
+void scenarioarmhuman(int human, int weapon, int magc)
+{
+    if (!ISINRANGE(human, MAX_HUMANS) || !ISINRANGE(weapon, ITEMTYPE_COUNT)) return;
+    scenarioArmHuman_game(human, weapon, magc);
 }
 
 void eventcreatebullet(BulletTypeIndex bt, Vector* pos, Vector* vel, int item)
@@ -33,76 +105,86 @@ void eventcreatebullet(BulletTypeIndex bt, Vector* pos, Vector* vel, int item)
     createEventBullet_game(bt, pos, vel, item);
 }
 
-void eventcreatebullethit(BulletHitTypeIndex bht, Vector* pos, Vector* normal)
+void eventcreatebullethit(BulletHitTypeIndex ht, Vector* pos, Vector* normal)
 {
     if (!pos || !normal) return;
-    if (!ISINRANGE(bht, BULLETHIT_COUNT)) return;
-    createEventBulletHit_game(0, bht, pos, normal);
+    if (!ISINRANGE(ht, BULLETHIT_COUNT)) return;
+    createEventBulletHit_game(0, ht, pos, normal);
 }
 
-void eventcreatemessage(MessageTypeIndex mt, char *m, int speaker, int dist)
+void eventcreatemessage(MessageTypeIndex mt, char* msg, int speaker, DistanceIndex dist)
 {
-    if (!m) return;
     if (!ISINRANGE(mt, MESSAGETYPE_COUNT)) return;
-    if (strlen(m) > 63) return;
-    createEventMessage_game(mt, m, speaker, dist);
+    if (!ISINRANGE(dist, DISTANCE_COUNT)) return;
+    if (strlen(msg) > 63) return;
+    createEventMessage_game(mt, msg, speaker, dist);
 }
 
-void eventcreatevehicletypeupdate(int v)
+void eventupdatevehicletype(int v)
 {
     if (!ISINRANGE(v, MAX_VEHICLES)) return;
     createEventCreateVehicle_game(v);
 }
 
-void eventcreatevehicleupdate(int v, VehicleUpdateIndex u, int part, Vector* pos, Vector* hvel)
+void eventupdatevehicle(int v, VehicleUpdateIndex ut, int part, Vector* pos, Vector* hitvel)
 {
-    if (!pos || !hvel) return;
-    if (!ISINRANGE(v, MAX_VEHICLES) || !ISINRANGE(u, VEHICLEUPDATE_COUNT)) return;
-    createEventUpdateVehicle_game(v, u, part, pos, hvel);
+    if (!pos || !hitvel) return;
+    if (!ISINRANGE(ut, VEHICLEUPDATE_COUNT)) return;
+    if (!ISINRANGE(v, MAX_VEHICLES)) return;
+    createEventUpdateVehicle_game(v, ut, part, pos, hitvel);
 }
 
-void eventcreateupdateitem(int i)
+void eventupdateitem(int i)
 {
     if (!ISINRANGE(i, MAX_ITEMS)) return;
     createEventUpdateItemInfo_game(i);
 }
 
-void eventcreateupdateplayer(int i, int finance)
+void eventupdateplayer(int p, int finance)
 {
-    if (!ISINRANGE(i, MAX_PLAYERS)) return;
+    if (!ISINRANGE(p, MAX_PLAYERS)) return;
     if (finance)
     {
-        createEventUpdatePlayerFinance_game(i);
-    } else createEventUpdatePlayer_game(i);
+        createEventUpdatePlayerFinance_game(p);
+    } else createEventUpdatePlayer_game(p);
 }
 
-void eventcreatesound(SoundIndex s, Vector* p, float vol, float pitch)
+void eventcreatesound(SoundIndex s, Vector* pos, float vol, float pitch)
 {
-    if (!p) return;
+    if (!pos) return;
     if (!ISINRANGE(s, SOUND_COUNT)) return;
-    createEventSound_game(s, p, vol, pitch);
+    createEventSound_game(s, pos, vol, pitch);
 }
 
-void eventcreatesounditem(SoundIndex s, int i, float vol, float pitch)
+void eventcreateitemsound(SoundIndex s, int itm, float vol, float pitch)
 {
-    if (!ISINRANGE(s, SOUND_COUNT) || !ISINRANGE(i, MAX_ITEMS)) return;
-    createEventSoundItem_game(s, i, vol, pitch);
+    if (!ISINRANGE(s, SOUND_COUNT)) return;
+    if (!ISINRANGE(itm, MAX_ITEMS)) return;
+    createEventSoundItem_game(s, itm, vol, pitch);
 }
 
-void eventcreateupdatecorp(int c, int opaque, int dm) // cannot wait to write docs
+void eventupdatecorp(int c, int opaque, int dm)
 {
     if (!ISINRANGE(c, MAX_CORPS)) return;
-    if (dm)
-    {
+    switch (dm) {
+        case 0:
         createEventUpdateCorpDoorState_game(c, opaque);
-    } else createEventUpdateCorpMission_game(c, opaque);
+        break;
+
+        case 1:
+        createEventUpdateCorpMission_game(c, opaque);
+        break;
+
+        default:
+        break;
+    }
 }
 
-void eventcreateupdateelim(int p, int tracker, int team, int savior, Vector* saviorpos)
+void eventupdateelim(int player, int tracker, int team, int savior, Vector* saviorpos)
 {
     if (!saviorpos) return;
-    if (!ISINRANGE(p, MAX_PLAYERS) || !ISINRANGE(team, MAX_CORPS) || !ISINRANGE(savior, MAX_PLAYERS)) return;
-    createEventUpdateElimState_game(p, tracker, team, savior, saviorpos);
+    if (!ISINRANGE(player, MAX_PLAYERS) || !ISINRANGE(savior, MAX_PLAYERS) || !ISINRANGE(team, MAX_CORPS)) return;
+    createEventUpdateElimState_game(player, tracker, team, savior, saviorpos);
 }
 
 void eventcreateexplosion(Vector* pos)
@@ -111,34 +193,65 @@ void eventcreateexplosion(Vector* pos)
     createEventExplosion_game(0, pos); // afaik there's no other explosion types
 }
 
-void playergivewanted(int p, int victim, int basepoints)
+int lineintersecttriangle(Vector* out, Vector* normal, float* outfraction, Vector* posa, Vector* posb, Vector* tria, Vector* trib, Vector* tric)
+{
+    if (!out || !normal || !outfraction || !posa || !posb || !tria || !trib || !tric) return -1;
+    return lineIntersectTriangle_game(out, normal, outfraction, posa, posb, tria, trib, tric);
+}
+
+int lineintersecthuman(int h, Vector* posa, Vector* posb, float pad)
+{
+    if (!posa || !posb) return -1;
+    if (!ISINRANGE(h, MAX_HUMANS)) return -1;
+    return lineIntersectHuman_game(h, posa, posb, pad);
+}
+
+int lineintersectvehicle(int v, Vector* posa, Vector* posb, int wheels)
+{
+    if (!posa || !posb) return -1;
+    if (!ISINRANGE(v, MAX_VEHICLES)) return -1;
+    return lineIntersectVehicle_game(v, posa, posb, wheels);
+}
+
+int lineintersectlevel(Vector* posa, Vector* posb, int cityobjects)
+{
+    if (!posa || !posb) return -1;
+    return lineIntersectLevel_game(posa, posb, cityobjects);
+}
+
+void playergivewanted(int p, int victim, int base)
 {
     if (!ISINRANGE(p, MAX_PLAYERS) || !ISINRANGE(victim, MAX_PLAYERS)) return;
-    playerGiveWantedLevel_game(p, victim, basepoints);
+    playerGiveWantedLevel_game(p, victim, base);
 }
 
-void humandelete(int h)
+int itemgetbillval(int i)
 {
-    if (!ISINRANGE(h, MAX_HUMANS)) return;
-    deleteHuman_game(h);
+    if (!ISINRANGE(i, MAX_ITEMS)) return -1;
+    return itemCashGetBillValue_game(i);
 }
 
-void vehicledelete(int v)
+int itemaddbill(int i, int pos, int amount)
 {
-    if (!ISINRANGE(v, MAX_VEHICLES)) return;
-    deleteVehicle_game(v);
+    if (!ISINRANGE(i, MAX_ITEMS)) return -1;
+    return itemCashAddBill_game(i, pos, amount);
 }
 
-void accountssave(void)
+void itemremovebill(int i, int amount)
 {
-    saveAccountsServer_game();
+    if (!ISINRANGE(i, MAX_ITEMS)) return;
+    itemCashRemoveBill_game(i, amount);
 }
 
-int humancreate(Vector* pos, RotMatrix* rot, int p)
+int itemsetmemotext(int i, char* text)
 {
-    if (!pos || !rot) return -1;
-    if (!ISINRANGE(p, MAX_PLAYERS)) return -1;
-    int idx = createHuman_game(pos, rot, p);
-    return idx;
+    if (!ISINRANGE(i, MAX_ITEMS)) return -1;
+    if (strlen(text) > 1023) return -1;
+    return itemSetMemo_game(i, text);
 }
 
+int itemnetworkcomputerline(int i, unsigned int line)
+{
+    if (!ISINRANGE(i, MAX_ITEMS)) return -1;
+    return itemComputerTransmitLine_game(i, line);
+}

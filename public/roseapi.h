@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 /*GENERAL*/
 typedef void* PluginContext;
 #define C_PROLOGUE plugin_init(PluginContext ctx)
-#define ISINRANGE(i, r) ((i) >= 0 && (i) < (r))
+#define ISINRANGE(i, r) ((unsigned int)(i) < (unsigned int)(r))
 
 /*CLI COMMANDS*/
 typedef void (*CLICallback)(int argc, char **args);
@@ -177,6 +177,7 @@ typedef enum MissionLocationIndex MissionLocationIndex;
 typedef enum BulletHitTypeIndex BulletHitTypeIndex;
 typedef enum MessageTypeIndex MessageTypeIndex;
 typedef enum VehicleUpdateIndex VehicleUpdateIndex;
+typedef enum DistanceIndex DistanceIndex;
 
 /*GLOBALS*/
 extern ROSEAPI RigidBody* bodies;
@@ -230,24 +231,72 @@ ROSEAPI void vectorrotateinverse(Vector *vec, RotMatrix *m);
 ROSEAPI void rotmatrixtoeuler(Vector* result, RotMatrix* r);
 
 /* API */
-ROSEAPI void bonddelete(int id);
-ROSEAPI void eventcreatebullet(BulletTypeIndex bt, Vector* pos, Vector* vel, int item);
-ROSEAPI void eventcreatebullethit(BulletHitTypeIndex bht, Vector* pos, Vector* normal);
-ROSEAPI void eventcreatemessage(MessageTypeIndex mt, char *m, int speaker, int dist);
-ROSEAPI void eventcreatevehicletypeupdate(int v);
-ROSEAPI void eventcreatevehicleupdate(int v, VehicleUpdateIndex u, int part, Vector* pos, Vector* hvel);
-ROSEAPI void eventcreateupdateitem(int i);
-ROSEAPI void eventcreateupdateplayer(int i, int finance);
-ROSEAPI void eventcreatesound(SoundIndex s, Vector* p, float vol, float pitch);
-ROSEAPI void eventcreatesounditem(SoundIndex s, int i, float vol, float pitch);
-ROSEAPI void eventcreateupdatecorp(int c, int opaque, int dm);
-ROSEAPI void eventcreateupdateelim(int p, int tracker, int team, int savior, Vector* saviorpos);
-ROSEAPI void eventcreateexplosion(Vector* pos);
-ROSEAPI void playergivewanted(int p, int victim, int basepoints);
-ROSEAPI void vehicledelete(int v);
-ROSEAPI void accountssave(void);
-ROSEAPI void humandelete(int h);
+
+//creates a human with playerid p, returns an index >= 0 or -1 on failure
 ROSEAPI int humancreate(Vector* pos, RotMatrix* rot, int p);
+//creates an item, returns an index >= 0 or -1 on failure
+ROSEAPI int itemcreate(ItemTypeIndex t, Vector* pos, Vector* vel, RotMatrix* rot);
+//creates a vehicle, returns an index >= 0 or -1 on fail
+ROSEAPI int vehiclecreate(VehicleTypeIndex vt, Vector* pos, Vector* vel, RotMatrix* rot, VehicleColorIndex c);
+// returns index >= 0 or -1 on fail
+ROSEAPI int playercreate(void);
+// deletes player p
+ROSEAPI void playerdelete(int p);
+// deletes human h
+ROSEAPI void humandelete(int h);
+// delete item i
+ROSEAPI void itemdelete(int i);
+//deletes vehicle v
+ROSEAPI void vehicledelete(int v);
+//applies damage to bone of human h
+ROSEAPI void humanapplydamage(int h, int bone, int damage);
+//applies damage d to vehicle v
+ROSEAPI void vehicleapplydamage(int v, int d);
+//links child to item or item to human, returns falsy value on fail & truthy on success
+ROSEAPI int itemlink(int item, int child, int human, int slot);
+// arms human with weapon & mag count
+ROSEAPI void scenarioarmhuman(int human, int weapon, int magc);
+//creates a bullet at pos with velocity vel with owner item
+ROSEAPI void eventcreatebullet(BulletTypeIndex bt, Vector* pos, Vector* vel, int item);
+//creates a bullet hit effect
+ROSEAPI void eventcreatebullethit(BulletHitTypeIndex ht, Vector* pos, Vector* normal);
+//creates a message event, msg cannot exceed 63 (char 64 reserved as null terminator)
+ROSEAPI void eventcreatemessage(MessageTypeIndex mt, char* msg, int speaker, DistanceIndex dist);
+// updates the vehicle type of v
+ROSEAPI void eventupdatevehicletype(int v);
+// updates vehicle v
+ROSEAPI void eventupdatevehicle(int v, VehicleUpdateIndex ut, int part, Vector* pos, Vector* hitvel);
+// updates item i
+ROSEAPI void eventupdateitem(int i);
+//updates p's information or finance depending on finance's truthy value
+ROSEAPI void eventupdateplayer(int p, int finance);
+//creates a sound
+ROSEAPI void eventcreatesound(SoundIndex s, Vector* pos, float vol, float pitch);
+//creates a sound that follows item itm
+ROSEAPI void eventcreateitemsound(SoundIndex s, int itm, float vol, float pitch);
+//updates corp c with data stored in opaque, if dm == 0 it updates door state with state = opaque, if dm != 0 it updates mission state with state = opaque
+ROSEAPI void eventupdatecorp(int c, int opaque, int dm);
+//updates eliminator
+ROSEAPI void eventupdateelim(int player, int tracker, int team, int savior, Vector* saviorpos);
+//creates an explosion effect & sound
+ROSEAPI void eventcreateexplosion(Vector* pos);
+//checks for a line intersection with triangle defined by tri#
+ROSEAPI int lineintersecttriangle(Vector* out, Vector* normal, float* outfraction, Vector* posa, Vector* posb, Vector* tria, Vector* trib, Vector* tric);
+//checks for a line intersection with human h
+ROSEAPI int lineintersecthuman(int h, Vector* posa, Vector* posb, float pad);
+// checks for a line intersection with vehicle v
+ROSEAPI int lineintersectvehicle(int v, Vector* posa, Vector* posb, int wheels);
+//checks for a line intersection with the level
+ROSEAPI int lineintersectlevel(Vector* posa, Vector* posb, int cityobjects);
+//gives player p a wanted value
+ROSEAPI void playergivewanted(int p, int victim, int base);
+ROSEAPI int itemgetbillval(int i);
+ROSEAPI int itemaddbill(int i, int pos, int amount);
+ROSEAPI void itemremovebill(int i, int amount);
+//maximum of 1023 char (1024 reserved null terminator)
+ROSEAPI int itemsetmemotext(int i, char* text);
+//networks line on computer i
+ROSEAPI int itemnetworkcomputerline(int i, unsigned int line);
 
 /* STRUCTURES */
 struct Vector {
@@ -1325,7 +1374,7 @@ enum BulletHitTypeIndex {
 
 enum MessageTypeIndex {
     MESSAGETYPE_CHAT,
-    MESSAGETYPE_HUMAN,
+    MESSAGETYPE_SPEAK,
     MESSAGETYPE_ITEM,
     MESSAGETYPE_MOTD,
     MESSAGETYPE_ADMINS,
@@ -1339,6 +1388,13 @@ enum VehicleUpdateIndex {
     VEHICLEUPDATE_TIRE,
     VEHICLEUPDATE_BODY,
     VEHICLEUPDATE_COUNT
+};
+
+enum DistanceIndex {
+    DISTANCE_WHISPER,
+    DISTANCE_NORMAL,
+    DISTANCE_YELL,
+    DISTANCE_COUNT
 };
 
 #endif

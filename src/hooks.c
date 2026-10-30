@@ -37,7 +37,7 @@ int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
     if (current_scope != NULL) {plugin_error(ctx, "cannot create hook while a hook is active"); return 0;}
     if (!pthread_equal(pthread_self(), gamethread)) {plugin_error(ctx, "cannot create hook from other threads"); return 0;}
     if (!callback) {plugin_error(ctx, "provide a hook callback"); return 0;}
-    if (h >= HOOK_COUNT || h < 0) { plugin_error(ctx, "invalid hook index"); return 0; }
+    if (!ISINRANGE(h, HOOK_COUNT)) { plugin_error(ctx, "invalid hook index"); return 0; }
     if ((flags & FLAG_HOOK_PRE) && flags & (FLAG_HOOK_POST))
     {
         plugin_error(ctx, "cannot place hook on both pre & post");
