@@ -44,7 +44,10 @@ enum {
 #define FLAG_HOOK_POST (1u << 1)
 #define FLAG_HOOK_PRIORITY (1u << 2)
 
-//callback must have same signature as function you are hooking, return type void. for post callbacks, modify the signature to add one last argument that has the same type as the function's return type to inspect the result of the original function call
+/*callback must have same signature as function you are hooking with return type void.
+for post callbacks, modify the signature to add one last argument that
+inherits the same type as the function's return type
+to inspect the result of the original function call*/
 ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback);
 
 /*LOGGING*/
@@ -53,6 +56,12 @@ ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback
 ROSEAPI void plugin_error(PluginContext ctx, const char *msg, ...);
 // logs plugin
 ROSEAPI void plugin_log(PluginContext ctx, const char *msg, ...);
+
+#define PLUGIN_THROW(ctx, msg) \
+plugin_error((ctx), "exception thrown at line %d: %s", __LINE__, (msg))
+
+#define PLUGIN_PERROR(ctx) \
+plugin_error((ctx), "%s", strerror(errno))
 
 /*FORWARD DECLARATION OF STRUCTURES*/
 typedef struct Vector Vector;
@@ -185,6 +194,8 @@ typedef enum BulletHitTypeIndex BulletHitTypeIndex;
 typedef enum MessageTypeIndex MessageTypeIndex;
 typedef enum VehicleUpdateIndex VehicleUpdateIndex;
 typedef enum DistanceIndex DistanceIndex;
+typedef enum RigidBodyTypeIndex RigidBodyTypeIndex;
+typedef enum CreateBondIndex CreateBondIndex;
 
 /*GLOBALS*/
 extern ROSEAPI RigidBody* bodies;
@@ -304,6 +315,26 @@ ROSEAPI void itemremovebill(int i, int amount);
 ROSEAPI int itemsetmemotext(int i, char* text);
 //networks line on computer i
 ROSEAPI int itemnetworkcomputerline(int i, unsigned int line);
+//creates a rope
+ROSEAPI int ropecreate(Vector* pos, RotMatrix* rot);
+//saves all active accounts on the server
+ROSEAPI void accountsaveserver(void);
+//creates a rigid body
+ROSEAPI int rigidbodycreate(RigidBodyTypeIndex t, Vector* pos, RotMatrix* rot, Vector* vel, float mass, Vector* scale);
+// deletes a rigid body
+ROSEAPI void rigidbodydelete(int r);
+// signature changes depending on b. body to level -> int bodyid, Vector* localpos, Vector* global body to body -> int bodya, int bodyb, Vector* alocal, Vector* blocal body body rot -> int bodya, int bodyb
+ROSEAPI int bondcreate(CreateBondIndex b, ...);
+// deletes bond b
+ROSEAPI void bonddelete(int b);
+// creates nr traffic cars
+ROSEAPI void scenariocreatetraffic(int nr);
+// explodes an item (no effect, only damage + vel)
+ROSEAPI void itemgrenadeexplosion(int i);
+// resets the game safely
+ROSEAPI void resetgamesafe(void);
+// resets the game unsafely (SINCERE WARNING: USE THIS AT YOUR OWN RISK!!!)
+ROSEAPI void resetgameunsafe(void);
 
 /* STRUCTURES */
 struct Vector {
@@ -783,7 +814,7 @@ struct Vehicle {
 
 struct Bond {
     int active;
-    int type;
+    int __type;
     int __unk0;
     int despawnTime;
     char __unkpad71[28];
@@ -1402,6 +1433,21 @@ enum DistanceIndex {
     DISTANCE_NORMAL,
     DISTANCE_YELL,
     DISTANCE_COUNT
+};
+
+enum RigidBodyTypeIndex {
+    RIGIDBODYTYPE_BONE,
+    RIGIDBODYTYPE_CAR,
+    RIGIDBODYTYPE_WHEEL,
+    RIGIDBODYTYPE_ITEM,
+    RIGIDBODYTYPE_COUNT
+};
+
+enum CreateBondIndex {
+    CREATEBOND_BODYTOLEVEL,
+    CREATEBOND_BODYTOBODY,
+    CREATEBOND_BODYBODYROT,
+    CREATEBOND_COUNT
 };
 
 #endif

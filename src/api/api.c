@@ -17,7 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "engine.h"
+#include "hooks.h"
+#include <stdarg.h>
 #include <roseapi.h>
+#include <stdarg.h>
 #include <string.h>
 
 int humancreate(Vector* pos, RotMatrix* rot, int p)
@@ -254,4 +257,95 @@ int itemnetworkcomputerline(int i, unsigned int line)
 {
     if (!ISINRANGE(i, MAX_ITEMS)) return -1;
     return itemComputerTransmitLine_game(i, line);
+}
+
+int ropecreate(Vector* pos, RotMatrix* rot)
+{
+    if (!pos || !rot) return -1;
+    return createRope_game(pos, rot);
+}
+
+void accountsaveserver(void)
+{
+    saveAccountsServer_game();
+}
+
+int rigidbodycreate(RigidBodyTypeIndex t, Vector* pos, RotMatrix* rot, Vector* vel, float mass, Vector* scale)
+{
+    if (!pos || !rot || !vel || !scale) return -1;
+    if (!ISINRANGE(t, RIGIDBODYTYPE_COUNT)) return -1;
+    return createRigidBody_game(t, pos, rot, vel, mass, scale);
+}
+
+void rigidbodydelete(int r)
+{
+    if (!ISINRANGE(r, MAX_RIGIDBODIES)) return;
+    bodies[r].active = 0;
+}
+
+int bondcreate(CreateBondIndex b, ...)
+{
+    if (!ISINRANGE(b, CREATEBOND_COUNT)) return -1;
+    va_list args;
+    va_start(args, b);
+    int returnval = -1;
+    if (b == CREATEBOND_BODYTOLEVEL)
+    {
+        int bodyid = va_arg(args, int);
+        Vector* localpos = va_arg(args, Vector*);
+        Vector* globalpos = va_arg(args, Vector*);
+        if (ISINRANGE(bodyid, MAX_RIGIDBODIES) && localpos && globalpos)
+        {
+            returnval = createBondRigidBodyToLevel_game(bodyid, localpos, globalpos);
+        }
+    }
+    if (b == CREATEBOND_BODYTOBODY)
+    {
+        int bodya = va_arg(args, int);
+        int bodyb = va_arg(args, int);
+        Vector* alocal = va_arg(args, Vector*);
+        Vector* blocal = va_arg(args, Vector*);
+        if (ISINRANGE(bodya, MAX_RIGIDBODIES) && ISINRANGE(bodyb, MAX_RIGIDBODIES) && alocal && blocal)
+        {
+            returnval = createBondRigidBodyToRigidBody_game(bodya, bodyb, alocal, blocal);
+        }
+    }
+    if (b == CREATEBOND_BODYBODYROT)
+    {
+        int bodya = va_arg(args, int);
+        int bodyb = va_arg(args, int);
+        if (ISINRANGE(bodya, MAX_RIGIDBODIES) && ISINRANGE(bodyb, MAX_RIGIDBODIES))
+        {
+            returnval = createBondRigidBodyRotRigidBody_game(bodya, bodyb);
+        }
+    }
+    va_end(args);
+    return returnval;
+}
+
+void bonddelete(int b)
+{
+    if (!ISINRANGE(b, MAX_BONDS)) return;
+    deleteBond_game(b);
+}
+
+void scenariocreatetraffic(int nr)
+{
+    createTraffic_game(nr);
+}
+
+void itemgrenadeexplosion(int i)
+{
+    if (!ISINRANGE(i, MAX_ITEMS)) return;
+    grenadeExplosion_game(i);
+}
+
+void resetgamesafe(void)
+{
+    hookslogicresetgame = 1;
+}
+
+void resetgameunsafe(void)
+{
+    resetGame_game();
 }

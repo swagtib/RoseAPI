@@ -57,4 +57,6 @@ typedef struct HookScope {
 
 extern Hook hooks[HOOK_COUNT];
 
+extern int hookslogicresetgame;
+
 #endif

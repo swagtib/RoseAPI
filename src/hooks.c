@@ -31,6 +31,8 @@ Hook hooks[HOOK_COUNT];
 
 static HookScope* current_scope = NULL;
 
+int hookslogicresetgame = 0;
+
 int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
 {
     if (!plugincheckcontext(ctx)) return 0;
@@ -124,6 +126,11 @@ static void logichook(void)
     HookScope scope;
     pushscope(&scope, HOOK_LOGIC);
     Hook* hook = scope.hook;
+    if (hookslogicresetgame)
+    {
+        hookslogicresetgame = 0;
+        resetGame_game();
+    }
     for (int i = 0; i < hook->pre->len; i++)
     {
         HookCallback* hcall = g_ptr_array_index(hook->pre, i);
