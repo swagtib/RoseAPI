@@ -32,14 +32,14 @@ typedef void (*CLICallback)(int argc, char **args);
 ROSEAPI int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
 
 /*HOOKING*/
-enum {
+typedef enum Hooks {
     HOOK_LOGIC,
     HOOK_PHYSICS,
     HOOK_BULLETSIM,
     HOOK_LIMBANIM,
     HOOK_ITEMLINK,
     HOOK_COUNT
-};
+} HookIndex;
 #define FLAG_HOOK_PRE (1u << 0)
 #define FLAG_HOOK_POST (1u << 1)
 #define FLAG_HOOK_PRIORITY (1u << 2)
@@ -48,7 +48,7 @@ enum {
 for post callbacks, modify the signature to add one last argument that
 inherits the same type as the function's return type
 to inspect the result of the original function call*/
-ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback);
+ROSEAPI int addhook(PluginContext ctx, HookIndex h, unsigned int flags, void *callback);
 
 /*LOGGING*/
 
