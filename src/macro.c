@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <errno.h>
 #include <string.h>
 #include <roseapi.h>
+#include <editline/readline.h>
 
 #define ANSI_ESCAPE "\x1b"
 #define ANSI_BOLD "[1;"
@@ -43,6 +44,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 static void api_vlog(FILE* file, const char *color1, const char *prefix, int appenderr, const char *color2, const char *fmt, va_list args)
 {
     flockfile(file);
+    fputs("\r\033[2K", file);
     fputs(color1, file);
     if (appenderr)
     {
@@ -52,6 +54,8 @@ static void api_vlog(FILE* file, const char *color1, const char *prefix, int app
     fputs(color2, file);
     vfprintf(file, fmt, args);
     fputs(ANSI_RESET "\n", file);
+    rl_on_new_line();
+    rl_forced_update_display();
     funlockfile(file);
 }
 

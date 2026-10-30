@@ -37,7 +37,7 @@ static void* clihandler(void *arg)
     {
         char **argv;
         int argc;
-        line = readline(""); //readline("roseapi> ");
+        line = readline("roseapi> ");
         if (line == NULL) break;
         g_strchomp(line);
         if (line[0] != '\0')
