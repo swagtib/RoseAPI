@@ -106,6 +106,8 @@ void freepluginhooks(Plugin* ptr)
     }
 }
 
+
+
 static void logichook(void)
 {
     ExecutedCommand* exec;
@@ -145,6 +147,119 @@ static void logichook(void)
     return;
 }
 
+static void physicshook(void)
+{
+    HookScope scope;
+    pushscope(&scope, HOOK_PHYSICS);
+    Hook* hook = scope.hook;
+    for (int i = 0; i < hook->pre->len; i++)
+    {
+        HookCallback* hcall = g_ptr_array_index(hook->pre, i);
+        if (!hcall) continue;
+        physicsSimulation_ft func = hcall->callback;
+        func();
+    }
+    if (!scope.veto)
+    {
+        physicsSimulation_ft tramp = hook->trampoline;
+        tramp();
+        for (int i = 0; i < hook->post->len; i++)
+        {
+            HookCallback* hcall = g_ptr_array_index(hook->post, i);
+            if (!hcall) continue;
+            physicsSimulation_ft func = hcall->callback;
+            func();
+        }
+    }
+    popscope();
+}
+
+static void bulletsimhook(void)
+{
+    HookScope scope;
+    pushscope(&scope, HOOK_BULLETSIM);
+    Hook* hook = scope.hook;
+    for (int i = 0; i < hook->pre->len; i++)
+    {
+        HookCallback* hcall = g_ptr_array_index(hook->pre, i);
+        if (!hcall) continue;
+        bulletSimulation_ft func = hcall->callback;
+        func();
+    }
+    if (!scope.veto)
+    {
+        bulletSimulation_ft tramp = hook->trampoline;
+        tramp();
+        for (int i = 0; i < hook->post->len; i++)
+        {
+            HookCallback* hcall = g_ptr_array_index(hook->post, i);
+            if (!hcall) continue;
+            bulletSimulation_ft func = hcall->callback;
+            func();
+        }
+    }
+    popscope();
+}
+
+static void limbanimationhook(int arg1, int arg2, int arg3, Vector * arg4, RotMatrix * arg5, Vector * arg6, float arg7, float arg8, float arg9, float * arg10, Vector * arg11, Vector * arg12, Vector * arg13, char arg14)
+{
+    HookScope scope;
+    pushscope(&scope, HOOK_LIMBANIM);
+    Hook* hook = scope.hook;
+    for (int i = 0; i < hook->pre->len; i++)
+    {
+        HookCallback* hcall = g_ptr_array_index(hook->pre, i);
+        if (!hcall) continue;
+        void (*func)(void) = hcall->callback;
+        func();
+    }
+    if (!scope.veto)
+    {
+        humanLimbInverseKinematics_ft tramp = hook->trampoline;
+        tramp(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+        for (int i = 0; i < hook->post->len; i++)
+        {
+            HookCallback* hcall = g_ptr_array_index(hook->post, i);
+            if (!hcall) continue;
+            void (*func)(void) = hcall->callback; // theres no reason to give this any sort of meaning considering all of the args are ??????
+            func();
+        }
+    }
+    popscope();
+}
+
+static int linkitemhook(int itm, int child, int human, int slot)
+{
+    if (ISOCCUPIED(HOOK_ITEMLINK)) return linkItem_game(itm, child, human, slot);
+    HookScope scope;
+    pushscope(&scope, HOOK_ITEMLINK);
+    Hook* hook = scope.hook;
+    for (int i = 0; i < hook->pre->len; i++)
+    {
+        HookCallback* hcall = g_ptr_array_index(hook->pre, i);
+        if (!hcall) continue;
+        void (*func)(int i, int c, int h, int s) = hcall->callback;
+        func(itm, child, human, slot);
+    }
+    int retval = -1;
+    if (!scope.veto)
+    {
+        linkItem_ft tramp = hook->trampoline;
+        retval = tramp(itm, child, human, slot);
+        for (int i = 0; i < hook->post->len; i++)
+        {
+            HookCallback* hcall = g_ptr_array_index(hook->post, i);
+            if (!hcall) continue;
+            void (*func)(int i, int c, int h, int s, int result) = hcall->callback;
+            func(itm, child, human, slot, retval);
+        }
+    }
+    popscope();
+    return retval;
+}
+
+
+
 int setuphooks(void)
 {
     for (int i = 0; i < HOOK_COUNT; i++)
@@ -153,6 +268,9 @@ int setuphooks(void)
         hooks[i].post = g_ptr_array_new_with_free_func(free);
     }
     int gumerror = 0;
-    INTERCEPT(HOOK_LOGIC, logicSimulation_game, logichook, gumerror);
+    INTERCEPT(HOOK_LOGIC, logicSimulation_game, logichook, gumerror)
+    INTERCEPT(HOOK_PHYSICS, physicsSimulation_game, physicshook, gumerror)
+    INTERCEPT(HOOK_BULLETSIM, bulletSimulation_game, bulletsimhook, gumerror)
+    INTERCEPT(HOOK_LIMBANIM, humanLimbInverseKinematics_game, limbanimationhook, gumerror)
     return 1;
 }

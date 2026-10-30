@@ -19,8 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef ROSEAPI_H
 #define ROSEAPI_H
 
-#include <stddef.h>
-
 #define ROSEAPI __attribute__((visibility("default")))
 
 /*GENERAL*/
@@ -36,11 +34,17 @@ ROSEAPI int addclicommand(PluginContext ctx, const char *name, CLICallback callb
 /*HOOKING*/
 enum {
     HOOK_LOGIC,
+    HOOK_PHYSICS,
+    HOOK_BULLETSIM,
+    HOOK_LIMBANIM,
+    HOOK_ITEMLINK,
     HOOK_COUNT
 };
 #define FLAG_HOOK_PRE (1u << 0)
 #define FLAG_HOOK_POST (1u << 1)
 #define FLAG_HOOK_PRIORITY (1u << 2)
+
+//callback must have same signature as function you are hooking, return type void. for post callbacks, modify the signature to add one last argument that has the same type as the function's return type to inspect the result of the original function call
 ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback);
 
 /*LOGGING*/

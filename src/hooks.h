@@ -35,6 +35,8 @@ if ((err = gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].tra
     return 0; \
 }
 
+#define ISOCCUPIED(idx) &hooks[idx].occupied
+
 typedef struct {
     void* callback;
     Plugin* plugin;
