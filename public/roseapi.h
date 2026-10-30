@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 /*GENERAL*/
 typedef void* PluginContext;
-#define C_PROLOGUE plugin_init(PluginContext ctx)
+#define C_PROLOGUE void plugin_init(PluginContext ctx)
 #define ISINRANGE(i, r) ((unsigned int)(i) < (unsigned int)(r))
 
 /*CLI COMMANDS*/
@@ -48,7 +48,10 @@ enum {
 ROSEAPI int addhook(PluginContext ctx, int h, unsigned int flags, void *callback);
 
 /*LOGGING*/
+
+// logs  a plugin error
 ROSEAPI void plugin_error(PluginContext ctx, const char *msg, ...);
+// logs plugin
 ROSEAPI void plugin_log(PluginContext ctx, const char *msg, ...);
 
 /*FORWARD DECLARATION OF STRUCTURES*/

@@ -68,8 +68,8 @@ static int loadCPlugin(Plugin* ptr, const char *path)
     if (!state) return 0;
     tcc_set_error_func(state, NULL, tcc_error);
     if (tcc_set_output_type(state, TCC_OUTPUT_MEMORY) != 0) goto cleanup;
-    if (tcc_add_file(state, path) != 0) goto cleanup;
     if (tcc_add_include_path(state, "api") != 0) goto cleanup;
+    if (tcc_add_file(state, path) != 0) goto cleanup;
     if (tcc_relocate(state) != 0) goto cleanup;
     void *entry = tcc_get_symbol(state, "plugin_init");
     if (!entry) goto cleanup;

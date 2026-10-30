@@ -28,6 +28,7 @@ pthread_t gamethread;
 
 static int initialize(void)
 {
+    gamethread = pthread_self();
     int hooks = setuphooks();
     int cli = setupcli();
     int plugins = setupPlugins();
@@ -36,7 +37,6 @@ static int initialize(void)
         roseapi_ferror("failed initialization, hooks %d::cli %d::plugins %d", hooks, cli, plugins);
         return 0;
     }
-    gamethread = pthread_self();
     return 1;
 }
 
@@ -45,7 +45,7 @@ static void resetsafetynet(void)
 {
     resetGame_ft callback = resetTrampoline;
     callback();
-    gum_interceptor_revert(g_interceptor, resetGame);
+    gum_interceptor_revert(g_interceptor, resetGame_game);
     roseapi_log("engine ready");
     if (!initialize()) ragequit;
 }
@@ -55,7 +55,7 @@ void bootstrapapi(uintptr_t base)
     setup38offsets(base);
     g_interceptor = gum_interceptor_obtain(); // we cache it globally to avoid reference leaks
     if (!g_interceptor) ragequit;
-    int result = gum_interceptor_replace(g_interceptor, resetGame, resetsafetynet, &resetTrampoline, NULL);
+    int result = gum_interceptor_replace(g_interceptor, resetGame_game, resetsafetynet, &resetTrampoline, NULL);
     if (result != GUM_REPLACE_OK)
     {
         roseapi_ferror("safety net installation failuare %d", result);
