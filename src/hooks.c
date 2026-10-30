@@ -153,6 +153,6 @@ int setuphooks(void)
         hooks[i].post = g_ptr_array_new_with_free_func(free);
     }
     int gumerror = 0;
-    INTERCEPT(HOOK_LOGIC, logicSimulation, logichook, gumerror);
+    INTERCEPT(HOOK_LOGIC, logicSimulation_game, logichook, gumerror);
     return 1;
 }
