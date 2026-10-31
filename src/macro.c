@@ -106,22 +106,22 @@ void tcc_error(void *opaque, const char *msg)
 
 // public
 
-void plugin_log(PluginContext ctx, const char *msg, ...)
+void plugin_log(PluginContext ctx, const char *fmt, ...)
 {
     if (!plugincheckcontext(ctx)) return;
     Plugin* plugin = ctx;
     va_list args;
-    va_start(args, msg);
-    api_vlog(stderr, PLUGINLOG, plugin->name, 0, LOGCOLOR2, msg, args);
+    va_start(args, fmt);
+    api_vlog(stderr, PLUGINLOG, plugin->name, 0, LOGCOLOR2, fmt, args);
     va_end(args);
 }
 
-void plugin_error(PluginContext ctx, const char *msg, ...)
+void plugin_error(PluginContext ctx, const char *fmt, ...)
 {
     if (!plugincheckcontext(ctx)) return;
     Plugin* plugin = ctx;
     va_list args;
-    va_start(args, msg);
-    api_vlog(stderr, ERRORCOLOR, plugin->name, 1, ERRORCOLOR, msg, args);
+    va_start(args, fmt);
+    api_vlog(stderr, ERRORCOLOR, plugin->name, 1, ERRORCOLOR, fmt, args);
     va_end(args);
 }

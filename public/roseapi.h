@@ -21,49 +21,236 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define ROSEAPI __attribute__((visibility("default")))
 
-/*GENERAL*/
+
+// LEGEND:
+
+// '-' = note
+// '->' = argument
+// '-->' = return value
+// '-/ /-' = code example
+// '!', '!!', '!!!' = importance level
+
+
+
+
+// PLUGIN 
+
+/*
+an opaque handle for a plugin
+
+- each plugin has it's own instance of this handle
+- !! it is valid from the moment plugin_init is called till the plugin is unloaded
+*/
 typedef void* PluginContext;
-#define C_PROLOGUE void plugin_init(PluginContext ctx)
+
+
+/*
+the entry point of a plugin.
+
+- this function is called whenever a C plugin is loaded
+- !! if this function isn't found in your plugin, the plugin is unloaded
+- !! hooks do not receive a copy of this ctx, store it in a global if neccessary
+
+
+-> ctx, see PluginContext
+*/
+void plugin_init(PluginContext ctx);
+
+
+
+// UTILITIES
+
+/*
+checks if 'i' is in the range [0, r)
+
+- ! 'i' and 'r' are both cast to unsigned integers
+- this only checks the range, not if something is active
+
+-> i, the number to check
+-> r, the upper endpoint of the range
+
+--> zero if it isn't in the range
+--> nonzero if it is within the range
+*/
 #define ISINRANGE(i, r) ((unsigned int)(i) < (unsigned int)(r))
 
-/*CLI COMMANDS*/
+
+// CLI COMMANDS
+
+/*
+the cli callback signature
+
+- !! argc & argv does not include the command name itself, only whats after, args[0] is the first argument
+
+- !!! cli commands are queued and ran on the game thread every tick
+
+-> argc, number of arguments passed to the cli command
+-> args, an array of char*
+*/
 typedef void (*CLICallback)(int argc, char **args);
+
+
+// a helper macro for CLI callback signatures, see CLICallback
 #define ARGSCLI int argc, char **args
+
+
+/*
+registers a CLI command callback.
+
+- !! it does not replace existing functions, if names overlap, it fails
+- ! you cannot provide a NULL callback
+- ! you cannot provide a NULL ctx
+- ! this function logs failuares
+
+- !!! this function can only be called from the game thread
+
+-> ctx, see PluginContext
+-> name, the name of your CLI command (no length limit)
+-> callback, function to be called on invocation of the cli command, see CLICallback
+
+--> 0 on failuare
+--> 1 on success
+*/
 ROSEAPI int addclicommand(PluginContext ctx, const char *name, CLICallback callback);
 
-/*HOOKING*/
+
+
+// HOOKING
+
+// all valid hooks & their callback signatures
 typedef enum Hooks {
-    HOOK_LOGIC,
-    HOOK_PHYSICS,
-    HOOK_BULLETSIM,
-    HOOK_LIMBANIM,
-    HOOK_ITEMLINK,
+    HOOK_LOGIC, // void logicsimulation(void);
+    HOOK_PHYSICS, // void physicssimulation(void);
+    HOOK_BULLETSIM, // void bulletsimulation(void);
+    HOOK_LIMBANIM, // void humanlimbanimate(void); animates a human's limbs
+    HOOK_ITEMLINK, // int itemlink(int item, int child, int human, int slot);
     HOOK_COUNT
 } HookIndex;
-#define FLAG_HOOK_PRE (1u << 0)
-#define FLAG_HOOK_POST (1u << 1)
-#define FLAG_HOOK_PRIORITY (1u << 2)
 
-/*callback must have same signature as function you are hooking with return type void.
-for post callbacks, modify the signature to add one last argument that
-inherits the same type as the function's return type
-to inspect the result of the original function call*/
+#define FLAG_HOOK_PRE (1u << 0) // flag to make the hook run before the original function
+#define FLAG_HOOK_POST (1u << 1) // flag that makes a hook run after the original function if it hasn't been vetoed
+#define FLAG_HOOK_PRIORITY (1u << 2) // flag that makes a hook be inserted at the head of the hook list (prioritize the hook)
+
+
+/*
+vetoes the currently running hook
+
+- !!! for functions that return a value, the failure value is returned instead (e.g -1 for creation functions like humancreate)
+- !! skips the original game function & post callbacks
+- !! doesn't do anything if called from inside a post hook
+- ! doesn't do anything if called outside of a hook
+
+*/
+ROSEAPI void hookveto(void);
+
+
+/*
+registers a hook on an engine function
+
+- !!! the callback takes the same arguments as the function you hook (see enum Hooks)
+- !!! a post callback gets one extra argument: the value the original function returned.
+
+itemlink example:
+
+-/
+
+void myitemlinkpre(int item, int child, int human, int slot);
+void myitemlinkpost(int item, int child, int human, int slot, int result);
+
+/-
+
+- !!! the callback type is not checked for anything except NULL! a wrong signature can crash the game.
+- !!! this function can only be called from the game thread
+- !!! this function cannot be called from within a hook
+- !! if no flags are passed, the hook is installed as a pre hook without priority
+- !! if neither pre or post are selected, the hook is installed as a pre hook
+- !! if both pre & post are selected, the function fails
+- !! post callbacks are not ran if the function is vetoed
+- !! any and all return values by hooks are completely ignored, make your callbacks return void
+- ! ctx cannot be NULL
+- ! h must be a valid hook index, see enum Hooks/HookIndex
+- ! this function logs errors
+
+- for details on vetoing, see 'hookveto(void);'
+
+-> ctx, see PluginContext
+-> h, see HookIndex/Hooks
+-> flags, see FLAG_HOOK_###
+-> callback, the function to invoke on the hook
+
+--> 0 on failuare
+--> 1 on success
+*/
 ROSEAPI int addhook(PluginContext ctx, HookIndex h, unsigned int flags, void *callback);
 
-/*LOGGING*/
 
-// logs  a plugin error
-ROSEAPI void plugin_error(PluginContext ctx, const char *msg, ...);
-// logs plugin
-ROSEAPI void plugin_log(PluginContext ctx, const char *msg, ...);
 
-#define PLUGIN_THROW(ctx, msg) \
-plugin_error((ctx), "exception thrown at line %d: %s", __LINE__, (msg))
+// LOGGING
 
+// all logging functions prepend "[###]" or "[### Error]" with ### being your plugin's name
+
+/*
+logs a plugin error
+
+- akin to printf();
+- ! uses stderr
+- !! never pass untrusted text as fmt, use plugin_error(ctx, "%s", text)
+
+-> ctx, see PluginContext
+-> fmt, a format string
+-> variadic arguments, formatting
+
+- prints [### Error] some text here
+*/
+ROSEAPI void plugin_error(PluginContext ctx, const char *fmt, ...);
+
+
+/*
+logs a general plugin message
+
+- akin to printf();
+- ! uses stdout
+- !! never pass untrusted text as fmt, use plugin_log(ctx, "%s", text)
+
+-> ctx, see PluginContext
+-> fmt, a format string
+-> variadic arguments, formatting
+
+- prints [###] some text here
+*/
+ROSEAPI void plugin_log(PluginContext ctx, const char *fmt, ...);
+
+/*
+logs an exception
+
+- see plugin_error
+- !! this does not stop execution, it only logs
+
+-> ctx, see PluginContext
+-> msg, a message
+
+- prints [### Error] exception logged at line nr: some text here
+*/
+#define PLUGIN_EXCEPTION(ctx, msg) \
+plugin_error((ctx), "exception logged at line %d: %s", __LINE__, (msg))
+
+/*
+logs a plugin errno
+
+- behaves akin to perror();
+- see plugin_error
+
+-> ctx, see PluginContext
+
+- prints [### Error] errno string here
+*/
 #define PLUGIN_PERROR(ctx) \
 plugin_error((ctx), "%s", strerror(errno))
 
-/*FORWARD DECLARATION OF STRUCTURES*/
+
+
+// FORWARD DECLARATION OF STRUCTURES
+
 typedef struct Vector Vector;
 typedef struct RotMatrix RotMatrix;
 typedef struct RigidBody RigidBody;
@@ -95,6 +282,19 @@ typedef struct LineIntersectResult LineIntersectResult;
 typedef struct ItemType ItemType;
 typedef struct TrafficCar TrafficCar;
 
+
+
+// LIMITS
+
+/*
+the max number of each kind of object the engine can hold
+
+- !! a full pool makes create functions return -1
+- ! valid indexes are 0 to MAX_# - 1, see ISINRANGE
+- ! MAX_BONES is per human, not global
+
+- TODO: add the MAX_# that are missing
+*/
 typedef enum {
     MAX_ACCOUNTS = 32768,
     MAX_PLAYERS = 256,
@@ -105,10 +305,29 @@ typedef enum {
     MAX_VEHICLES = 512,
     MAX_RIGIDBODIES = 8192,
     MAX_BONDS = 16384,
-    MAX_CORPS = 32
+    MAX_CORPS = 32,
+    MAX_BONES = 16
 } MaxNumberOf;
 
-/*SERVER OPTIONS*/
+
+
+// SERVER OPTIONS
+
+/*
+the server's current options
+
+- !! numeric fields are pointers into engine memory, dereference to read or write
+- !! char* fields are buffers, use them directly, do not dereference
+- !!! gravity is read only.. for now
+- TODO: buffer sizes for the char* fields
+
+-/
+int port = *ServerOptions.serverPort;
+*ServerOptions.maxPlayers = 32;
+strcpy(ServerOptions.serverName, "my server");
+/-
+*/
+
 typedef struct {
     float* gravity;
     unsigned int* subVersion;
@@ -152,7 +371,15 @@ typedef struct {
 } ServerOpt;
 extern ROSEAPI ServerOpt ServerOptions;
 
-/*GAME STATUS*/
+
+
+// GAME STATUS
+
+/*
+the game's current status
+- !! numeric fields are pointers into engine memory, dereference to read or write
+*/
+
 typedef struct {
     unsigned int* sunTime;
     unsigned char* packet;
@@ -171,7 +398,10 @@ typedef struct {
 } GameOpt;
 extern ROSEAPI GameOpt GameOptions;
 
-/* FORWARD DECLARATON OF ENUMERATIONS */
+
+
+// FORWARD DECLARATON OF ENUMERATIONS
+
 typedef enum SoundIndex SoundIndex;
 typedef enum ItemTypeIndex ItemTypeIndex;
 typedef enum BulletTypeIndex BulletTypeIndex;
@@ -197,7 +427,16 @@ typedef enum DistanceIndex DistanceIndex;
 typedef enum RigidBodyTypeIndex RigidBodyTypeIndex;
 typedef enum CreateBondIndex CreateBondIndex;
 
-/*GLOBALS*/
+// GLOBALS
+
+/*
+pointers directly into the engine's memory
+
+- !! all of these except lineIntersectResult are arrays of structs
+- !! lineIntersectResult changes every single time a intersection function is called
+- ! see limits
+*/
+
 extern ROSEAPI RigidBody* bodies;
 extern ROSEAPI Connection* connections;
 extern ROSEAPI Account* accounts;
@@ -218,7 +457,21 @@ extern ROSEAPI LineIntersectResult* lineIntersectResult;
 extern ROSEAPI ItemType* itemTypes;
 extern ROSEAPI TrafficCar* trafficCars;
 
-/* VECTOR */
+
+
+// VECTOR MANIPULATION
+
+/*
+vector manipulation functions
+
+- !!! these functions WILL sigsegv if passed a NULL pointer
+- ! arguments named v are modified in place
+- ! if the function has a result parameter, the result is written there
+- ! functions returning int return 0 for false, nonzero for true
+- !! the game uses a left handed axis
+- !! the game uses radians
+*/
+
 ROSEAPI void vectorcopy(Vector* copyto, Vector* copyfrom);
 ROSEAPI void vectorzero(Vector* v);
 ROSEAPI float vectorlengthsquared(Vector* v);
@@ -245,8 +498,10 @@ ROSEAPI void vectorlerp(Vector* result, Vector *a, Vector *b, float t);
 ROSEAPI int vectorequals(Vector* a, Vector* b, float epsilon);
 ROSEAPI void vectorsetlength(Vector* v, float length);
 ROSEAPI void rotmatrixtranspose(RotMatrix* result, RotMatrix* m);
-ROSEAPI void vectorrotateinverse(Vector *vec, RotMatrix *m);
+ROSEAPI void vectorrotateinverse(Vector *v, RotMatrix *m);
 ROSEAPI void rotmatrixtoeuler(Vector* result, RotMatrix* r);
+
+
 
 /* API */
 

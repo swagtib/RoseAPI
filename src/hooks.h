@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "plugin/plugin.h"
 #include <frida-gum.h>
-#include "macro.h"
 
 extern GumInterceptor* g_interceptor;
 
@@ -35,7 +34,7 @@ if ((err = gum_interceptor_replace(g_interceptor, func, replace, &hooks[idx].tra
     return 0; \
 }
 
-#define ISOCCUPIED(idx) &hooks[idx].occupied
+#define ISOCCUPIED(idx) hooks[idx].occupied
 
 typedef struct {
     void* callback;

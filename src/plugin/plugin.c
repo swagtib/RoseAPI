@@ -207,6 +207,8 @@ int plugincheckcontext(PluginContext ctx)
 
 int setupPlugins(void)
 {
+    FILE* api_h = fopen("api/roseapi.h", "r");
+    if (!api_h) {roseapi_error("api/roseapi.h not found"); return 0;}
     plugins = g_hash_table_new_full(g_str_hash, _frida_g_str_equal, NULL, destroyplugin);
     Command* cmd1 = malloc(sizeof(Command));
     Command* cmd2 = malloc(sizeof(Command));
@@ -236,7 +238,7 @@ int setupPlugins(void)
         }
         fclose(file);
         free(buf);
-    } else roseapi_error("failed open");
+    }
     DIR* dir = opendir("plugins");
     if (dir)
     {
@@ -263,7 +265,7 @@ int setupPlugins(void)
             }
         }
         closedir(dir);
-    } else roseapi_error("failed open");
+    }
     if (disabled && count > 0)
     {
         for (int i = 0; i < count; i++)

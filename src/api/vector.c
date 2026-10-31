@@ -227,12 +227,12 @@ void rotmatrixtranspose(RotMatrix* result, RotMatrix* m)
     *result = t;
 }
 
-void vectorrotateinverse(Vector *vec, RotMatrix *m)
+void vectorrotateinverse(Vector *v, RotMatrix *m)
 {
-    float x = vectordot(vec, &m->xaxis);
-    float y = vectordot(vec, &m->yaxis);
-    float z = vectordot(vec, &m->zaxis);
-    vectorset(vec, x, y, z);
+    float x = vectordot(v, &m->xaxis);
+    float y = vectordot(v, &m->yaxis);
+    float z = vectordot(v, &m->zaxis);
+    vectorset(v, x, y, z);
 }
 
 void rotmatrixtoeuler(Vector* result, RotMatrix* r)

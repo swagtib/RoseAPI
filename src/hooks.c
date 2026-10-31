@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "plugin/plugin.h"
 #include "roseapi.h"
 #include "bootstrap.h"
+#include "macro.h"
 
 GumInterceptor* g_interceptor = NULL;
 
@@ -33,7 +34,7 @@ static HookScope* current_scope = NULL;
 
 int hookslogicresetgame = 0;
 
-int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
+int addhook(PluginContext ctx, HookIndex h, unsigned int flags, void *callback)
 {
     if (!plugincheckcontext(ctx)) return 0;
     if (current_scope != NULL) {plugin_error(ctx, "cannot create hook while a hook is active"); return 0;}
@@ -63,6 +64,14 @@ int addhook(PluginContext ctx, int h, unsigned int flags, void *callback)
         g_ptr_array_insert(array, 0, hcall);
     } else g_ptr_array_add(array, hcall);
     return 1;
+}
+
+void hookveto(void)
+{
+    if (current_scope)
+    {
+        current_scope->veto = 1;
+    }
 }
 
 static void pushscope(HookScope *scope, int hookidx)
@@ -237,7 +246,11 @@ static void limbanimationhook(int arg1, int arg2, int arg3, Vector * arg4, RotMa
 
 static int linkitemhook(int itm, int child, int human, int slot)
 {
-    if (ISOCCUPIED(HOOK_ITEMLINK)) return linkItem_game(itm, child, human, slot);
+    if (ISOCCUPIED(HOOK_ITEMLINK))
+    {
+        linkItem_ft f = hooks[HOOK_ITEMLINK].trampoline;
+        return f(itm, child, human, slot);
+    }
     HookScope scope;
     pushscope(&scope, HOOK_ITEMLINK);
     Hook* hook = scope.hook;
@@ -265,8 +278,6 @@ static int linkitemhook(int itm, int child, int human, int slot)
     return retval;
 }
 
-
-
 int setuphooks(void)
 {
     for (int i = 0; i < HOOK_COUNT; i++)
@@ -279,5 +290,6 @@ int setuphooks(void)
     INTERCEPT(HOOK_PHYSICS, physicsSimulation_game, physicshook, gumerror)
     INTERCEPT(HOOK_BULLETSIM, bulletSimulation_game, bulletsimhook, gumerror)
     INTERCEPT(HOOK_LIMBANIM, humanLimbInverseKinematics_game, limbanimationhook, gumerror)
+    INTERCEPT(HOOK_ITEMLINK, linkItem_game, linkitemhook, gumerror)
     return 1;
 }
