@@ -178,12 +178,12 @@ void vectorrotate(Vector *v, RotMatrix *r)
 void rotmatrixmul(RotMatrix* result, RotMatrix* a, RotMatrix* b)
 {
     RotMatrix tmp;
-    tmp.xaxis = a->xaxis;
-    tmp.yaxis = a->yaxis;
-    tmp.zaxis = a->zaxis;
-    vectorrotate(&tmp.xaxis, b);
-    vectorrotate(&tmp.yaxis, b);
-    vectorrotate(&tmp.zaxis, b);
+    tmp.xaxis = b->xaxis;
+    tmp.yaxis = b->yaxis;
+    tmp.zaxis = b->zaxis;
+    vectorrotate(&tmp.xaxis, a);
+    vectorrotate(&tmp.yaxis, a);
+    vectorrotate(&tmp.zaxis, a);
     *result = tmp;
 }
 

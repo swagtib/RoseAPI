@@ -220,6 +220,7 @@ logs a general plugin message
 */
 ROSEAPI void plugin_log(PluginContext ctx, const char *fmt, ...);
 
+
 /*
 logs an exception
 
@@ -233,6 +234,7 @@ logs an exception
 */
 #define PLUGIN_EXCEPTION(ctx, msg) \
 plugin_error((ctx), "exception logged at line %d: %s", __LINE__, (msg))
+
 
 /*
 logs a plugin errno
@@ -427,6 +429,8 @@ typedef enum DistanceIndex DistanceIndex;
 typedef enum RigidBodyTypeIndex RigidBodyTypeIndex;
 typedef enum CreateBondIndex CreateBondIndex;
 
+
+
 // GLOBALS
 
 /*
@@ -503,95 +507,542 @@ ROSEAPI void rotmatrixtoeuler(Vector* result, RotMatrix* r);
 
 
 
-/* API */
+// API
 
-//creates a human with playerid p, returns an index >= 0 or -1 on failure
+/*
+creates a human
+
+- ! fails if pos or rot is NULL
+- ! fails if p isnt a valid player index
+
+-> pos, the position of the human
+-> rot, the rotation of the human
+-> p, the player that owns this human, must be a valid index, see MaxNumberOf
+
+--> a human index
+--> -1 on failuare
+*/
 ROSEAPI int humancreate(Vector* pos, RotMatrix* rot, int p);
-//creates an item, returns an index >= 0 or -1 on failure
+
+
+/*
+creates an item
+- ! fails if pos, vel or rot is NULL
+- ! fails if t isn't an active itemtype, see ItemTypeIndex's type definition
+
+-> t, an active itemtype index
+-> pos, the position of the item
+-> vel, the velocity of the item
+-> rot, the rotation of the item
+
+--> an item index
+--> -1 on fail
+*/
 ROSEAPI int itemcreate(ItemTypeIndex t, Vector* pos, Vector* vel, RotMatrix* rot);
-//creates a vehicle, returns an index >= 0 or -1 on fail
+
+
+/*
+creates a vehicle
+- ! fails if pos, vel or rot is NULL
+- ! fails if vt or c isn't a valid index, see VehicleTypeIndex & VehicleColorIndex
+
+-> vt, the vehicle type
+-> pos, the position
+-> vel, the velocity
+-> rot, the rotation
+-> c, the color
+
+--> a vehicle index
+--> -1 on fail
+*/
 ROSEAPI int vehiclecreate(VehicleTypeIndex vt, Vector* pos, Vector* vel, RotMatrix* rot, VehicleColorIndex c);
-// returns index >= 0 or -1 on fail
+
+
+/*
+creates a player
+
+--> a player index
+--> -1 on fail
+*/
 ROSEAPI int playercreate(void);
-// deletes player p
+
+
+/*
+deletes a player
+
+-> p, a valid player index, see MaxNumberOf
+*/
 ROSEAPI void playerdelete(int p);
-// deletes human h
+
+
+/*
+deletes a human
+
+-> h, a valid human index, see MaxNumberOf
+*/
 ROSEAPI void humandelete(int h);
-// delete item i
+
+
+
+/*
+deletes an item
+
+-> i, a valid item index, see MaxNumberOf
+*/
 ROSEAPI void itemdelete(int i);
-//deletes vehicle v
+
+
+/*
+deletes a vehicle
+
+-> v, a valid vehicle index, see MaxNumberOf
+*/
 ROSEAPI void vehicledelete(int v);
-//applies damage to bone of human h
+
+
+/*
+applies damage to a human
+
+-> h, a valid human index, see MaxNumberOf
+-> bone, a valid bone index, see MaxNumberOf
+-> damage, the damage to apply to bone
+*/
 ROSEAPI void humanapplydamage(int h, int bone, int damage);
-//applies damage d to vehicle v
+
+
+/*
+applies damage to a vehicle
+
+-> v, a valid vehicle index, see MaxNumberOf
+-> d, the damage
+*/
 ROSEAPI void vehicleapplydamage(int v, int d);
-//links child to item or item to human, returns falsy value on fail & truthy on success
+
+
+/*
+links an item to a chilld item or to a human
+
+-> item, a valid item index, see MaxNumberOf
+-> child, a valid item index (see MaxNumberOf) or -1
+-> slot, a valid inventory slot (TODO: add inventory slot documentation to MaxNumberOf)
+
+--> 1 on success
+--> 0 on failuare
+*/
 ROSEAPI int itemlink(int item, int child, int human, int slot);
-// arms human with weapon & mag count
+
+
+/*
+arms a human
+
+- ! the magazine is item index weapon + 1
+
+-> human, a valid human index, see MaxNumberOf
+-> weapon, a valid weapon index, see MaxNumberOf
+-> magc, the amount of magazines
+*/
 ROSEAPI void scenarioarmhuman(int human, int weapon, int magc);
-//creates a bullet at pos with velocity vel with owner item
+
+
+/*
+creates a bullet
+
+- ! pos and vel cannot be NULL
+
+-> bt, a bullet type index, see enum BulletTypeIndex
+-> pos, the position
+-> vel, the velocity
+-> item, the item the bullet originated from, must be a valid item index (see MaxNumberOf)
+*/
 ROSEAPI void eventcreatebullet(BulletTypeIndex bt, Vector* pos, Vector* vel, int item);
-//creates a bullet hit effect
+
+
+/*
+creates a bullet hit effect
+
+- ! pos and normal cannot be NULL
+
+-> ht, a bullet hit type index, see enum BulletHitTypeIndex
+-> pos, the position
+-> normal, the normal
+*/
 ROSEAPI void eventcreatebullethit(BulletHitTypeIndex ht, Vector* pos, Vector* normal);
-//creates a message event, msg cannot exceed 63 (char 64 reserved as null terminator)
+
+/*
+creates a message event
+
+- !! msg cannot exceed 63 (64 is reserved \0)
+
+-> mt, the message type, see enum MessageTypeIndex
+-> msg, the message
+-> speaker, a valid player index (see MaxNumberOf)
+-> dist, a valid Distance index, see enum DistanceIndex
+*/
 ROSEAPI void eventcreatemessage(MessageTypeIndex mt, char* msg, int speaker, DistanceIndex dist);
-// updates the vehicle type of v
+
+
+/*
+updates a vehicle's type
+
+-> v, a valid vehicle index, see MaxNumberOf
+*/
 ROSEAPI void eventupdatevehicletype(int v);
-// updates vehicle v
+
+
+/*
+updates a vehicle
+
+- ! pos and hitvel cannot be NULL
+
+-> v, a valid vehicle index, see MaxNumberOf
+-> ut, a valid vehicle update index, see enum VehicleUpdateIndex
+-> part, a valid part index (TODO: add max number of parts)
+-> pos, the hit position used for window breaking events (probably?)
+-> hitvel, the hit velocity used for window breaking events (probably?)
+*/
 ROSEAPI void eventupdatevehicle(int v, VehicleUpdateIndex ut, int part, Vector* pos, Vector* hitvel);
-// updates item i
+
+
+/*
+updates an item
+
+-> i, a valid item index, see MaxNumberOf
+*/
 ROSEAPI void eventupdateitem(int i);
-//updates p's information or finance depending on finance's truthy value
+
+
+/*
+updates a player
+
+- ! if finance is a truthy value, the player's finance is updated
+
+-> p, a valid player index, see MaxNumberOf
+-> finance, a boolean
+*/
 ROSEAPI void eventupdateplayer(int p, int finance);
-//creates a sound
+
+
+/*
+creates a sound
+
+- ! pos cannot be NULL
+
+-> s, a valid SoundIndex, see enum SoundIndex
+-> pos, the position of the sound
+-> vol, the volume of the sound
+-> pitch, the pitch of the sound
+*/
 ROSEAPI void eventcreatesound(SoundIndex s, Vector* pos, float vol, float pitch);
-//creates a sound that follows item itm
+
+
+/*
+creates a sound that follows an item
+
+-> s, a valid SoundIndex, see enum SoundIndex
+-> itm, a valid item index, see MaxNumberOf
+-> vol, the volume
+-> pitch, the pitch
+*/
 ROSEAPI void eventcreateitemsound(SoundIndex s, int itm, float vol, float pitch);
-//updates corp c with data stored in opaque, if dm == 0 it updates door state with state = opaque, if dm != 0 it updates mission state with state = opaque
+
+
+/* (HIGH POSSIBILITY OF CHANGE!)
+updates a corporation
+
+- !! dm acts like a boolean
+- !! opaque is the data that the corp should be updated with
+- ! if dm is 0, it sets the door's state to the value stored in opaque
+- ! if dm is 1, it sets the current mission's state to the value stored in opaque
+
+-> c, a valid corp index, see MaxNumberOf
+-> opaque, the data
+-> dm, see above
+*/
 ROSEAPI void eventupdatecorp(int c, int opaque, int dm);
-//updates eliminator
+
+
+/*
+updates the eliminator
+
+- ! saviorpos cannot be NULL
+
+-> player, a valid player index (the player to update), see MaxNumberOf
+-> tracker, if the tracker should appear
+-> savior, a valid player index (the savior), see MaxNumberOf
+-> saviorpos, the position of the savior
+*/
 ROSEAPI void eventupdateelim(int player, int tracker, int team, int savior, Vector* saviorpos);
-//creates an explosion effect & sound
+
+
+/*
+creates an explosion effect and sound
+
+- !! does not damage
+- ! pos cannot be NULL
+
+-> pos, the position
+*/
 ROSEAPI void eventcreateexplosion(Vector* pos);
-//checks for a line intersection with triangle defined by tri#
+
+
+/*
+checks if the line from posa to posb interacts with the triangle defined by tria, trib, tric
+
+- ! posa, posb, tria, trib, tric cannot be NULL (can out, normal, and out be?)
+
+-> out, the place the intersection happened
+-> normal, the normal
+-> outfraction, the fraction output
+-> posa, start of the line
+-> posb, end of the line
+-> tria, corner 1 of the triangle
+-> trib, corner 2 of the triangle
+-> tric, corner 3 of the triangle
+
+--> nonzero on success
+--> zero on fail
+*/
 ROSEAPI int lineintersecttriangle(Vector* out, Vector* normal, float* outfraction, Vector* posa, Vector* posb, Vector* tria, Vector* trib, Vector* tric);
-//checks for a line intersection with human h
+
+/*
+checks if the line from posa to posb intersects a human
+
+- ! posa and posb cannot be NULL
+
+-> h, a valid human index, see MaxNumberOf
+-> posa, start of the line
+-> posb, start of the line
+-> pad, padding
+
+--> nonzero on success
+--> 0 on fail
+*/
 ROSEAPI int lineintersecthuman(int h, Vector* posa, Vector* posb, float pad);
-// checks for a line intersection with vehicle v
+
+
+/*
+checks if the line from posa to posb intersects with a vehicle
+
+- ! posa and posb cannot be NULL
+
+-> v, a valid vehicle index, see MaxNumberof
+-> posa, the start of the line
+-> posb, the end of the line
+-> wheels, acts as a boolean, include wheels?
+
+--> nonzero on success
+--> 0 on fail
+*/
 ROSEAPI int lineintersectvehicle(int v, Vector* posa, Vector* posb, int wheels);
-//checks for a line intersection with the level
+
+
+/*
+checks if the line from posa to posb intersects with the level
+
+- ! posa and posb cannot be NULL
+
+-> posa, the start of the line
+-> posb, the end of the line
+-> cityobjects, include streetlights, etc
+*/
 ROSEAPI int lineintersectlevel(Vector* posa, Vector* posb, int cityobjects);
-//gives player p a wanted value
+
+
+/*
+gives a player a wanted value
+
+-> p, a valid player index, see MaxNumberOf
+-> victim, the victim, a valid player index, see MaxNumberOf
+-> base, the base points
+*/
 ROSEAPI void playergivewanted(int p, int victim, int base);
+
+
+/*
+gets the bill value of a cash stack
+
+- ! only works if the item is a stack
+
+-> i, a valid item index, see MaxNumberOf
+
+--> the value
+*/
 ROSEAPI int itemgetbillval(int i);
+
+
+/*
+adds bills to a stack
+
+-> i, the stack, a valid item index, see MaxNumberOf
+-> pos, the position in the stack
+-> amount, amount
+
+--> nonzero on success
+--> 0 on fail
+*/
 ROSEAPI int itemaddbill(int i, int pos, int amount);
+
+
+/*
+removes bills from a stack
+
+-> i, a valid item index, see MaxNumberOf
+-> amount, amount to delete
+*/
 ROSEAPI void itemremovebill(int i, int amount);
-//maximum of 1023 char (1024 reserved null terminator)
+
+
+/*
+sets a memo's text
+
+- !! only works if the item is a memo
+- !! maximum 1023 chars, (1024 is reserved \0)
+
+-> i, a valid item index, see MaxNumberOf
+-> text, the text
+
+--> nonzero on success
+--> 0 on fail
+*/
 ROSEAPI int itemsetmemotext(int i, char* text);
-//networks line on computer i
+
+
+/*
+networks a computer line
+
+- ! only works if it's a computer
+
+-> i, a valid item index, see MaxNumberOf
+-> line, the line (TODO: add max number of computer lines)
+
+--> nonzero on success
+--> 0 on fail
+*/
 ROSEAPI int itemnetworkcomputerline(int i, unsigned int line);
-//creates a rope
+
+
+/*
+creates a rope
+
+- ! pos and rot cannot be null
+
+-> pos, position
+-> rot, rotation
+
+--> nonzero on success
+--> 0 on fail
+*/
 ROSEAPI int ropecreate(Vector* pos, RotMatrix* rot);
-//saves all active accounts on the server
+
+
+/*
+saves all accounts on the server
+*/
 ROSEAPI void accountsaveserver(void);
-//creates a rigid body
+
+/*
+creates a rigid body
+
+- ! pos, rot, vel, scale cannot be NULL
+
+-> t, a valid rigidbody type, see enum RigidBodyTypeIndex
+-> pos, position
+-> rot, rotation
+-> vel, velocity
+-> mass, mass
+-> scale, scale
+
+--> a valid rigidbody index on success
+--> -1 on fail
+*/
 ROSEAPI int rigidbodycreate(RigidBodyTypeIndex t, Vector* pos, RotMatrix* rot, Vector* vel, float mass, Vector* scale);
-// deletes a rigid body
+
+
+/*
+deletes a rigidbody
+
+-> r, a valid rigidbody index, see MaxNumberOf
+*/
 ROSEAPI void rigidbodydelete(int r);
-// signature changes depending on b. body to level -> int bodyid, Vector* localpos, Vector* global body to body -> int bodya, int bodyb, Vector* alocal, Vector* blocal body body rot -> int bodya, int bodyb
+
+/*
+creates a bond
+
+- !! signature changes based on the create bond index, see enum CreateBondIndex
+
+-/
+bondcreate(CREATEBOND_BODYTOLEVEL, int bodyid, Vector* localpos, Vector* global);
+bondcreate(CREATEBOND_BODYTOBODY, int bodya, int bodyb, Vector* alocal, Vector* blocal);
+bondcreate(CREATEBOND_BODYBODYROT, int bodya, int bodyb);
+/-
+
+-> b, the type of bond to create, see enum CreateBondIndex
+
+-> bodyid, the body
+-> localpos, the local position
+-> globalpos, the global position
+
+-> bodya, the first body
+-> bodyb, the second body
+-> alocal, the first body's local
+-> blocal, the second body's local
+
+-> bodya, the first body
+-> bodyb, the second body
+
+--> a valid bond index
+--> -1 on fail
+*/
 ROSEAPI int bondcreate(CreateBondIndex b, ...);
-// deletes bond b
+
+
+/*
+deletes a bond
+
+-> b, a bond index, see MaxNumberOf
+*/
 ROSEAPI void bonddelete(int b);
-// creates nr traffic cars
+
+
+/*
+creates traffic cars
+
+-> nr, the amount of cars to create
+*/
 ROSEAPI void scenariocreatetraffic(int nr);
-// explodes an item (no effect, only damage + vel)
+
+
+/*
+explodes an item
+
+- !! this only damages, no effect and no sound
+
+-> i, a valid item index, see MaxNumberOf
+*/
 ROSEAPI void itemgrenadeexplosion(int i);
-// resets the game safely
+
+/*
+safely resets the game on logicsimulation
+
+- !! this does not instantly reset the game, it sets a flag and safely resets on logicsimulation
+- ! this calls resetgameunsafe at a safe point
+*/
 ROSEAPI void resetgamesafe(void);
-// resets the game unsafely (SINCERE WARNING: USE THIS AT YOUR OWN RISK!!!)
+
+/*
+resets the game immideatly from wherever you call it
+
+- !!! calling this in the wrong place can throw the server into a state only a full hard restart can fix
+- !!! the safest place to call this is before logicsimulation
+- !! the side effects are determined by where and when this function is called, these side effects are not documented because they are unpredictable
+- ! use resetgamesafe instead
+*/
 ROSEAPI void resetgameunsafe(void);
 
-/* STRUCTURES */
+
+
+// STRUCTURES
+
 struct Vector {
     float x;
     float y;
