@@ -80,7 +80,7 @@ checks if 'i' is in the range [0, r)
 /*
 the cli callback signature
 
-- !! argc & argv does not include the command name itself, only whats after, args[0] is the first argument
+- !! argc & args does not include the command name itself, only whats after, args[0] is the first argument
 
 - !!! cli commands are queued and ran on the game thread every tick
 
@@ -635,10 +635,10 @@ ROSEAPI int itemlink(int item, int child, int human, int slot);
 /*
 arms a human
 
-- ! the magazine is item index weapon + 1
+- ! the magazine is itemtype index weapon + 1
 
 -> human, a valid human index, see MaxNumberOf
--> weapon, a valid weapon index, see MaxNumberOf
+-> weapon, a valid item type index, see MaxNumberOf and ItemTypeIndex
 -> magc, the amount of magazines
 */
 ROSEAPI void scenarioarmhuman(int human, int weapon, int magc);
@@ -697,8 +697,8 @@ updates a vehicle
 -> v, a valid vehicle index, see MaxNumberOf
 -> ut, a valid vehicle update index, see enum VehicleUpdateIndex
 -> part, a valid part index (TODO: add max number of parts)
--> pos, the hit position used for window breaking events (probably?)
--> hitvel, the hit velocity used for window breaking events (probably?)
+-> pos, the hit position used for window breaking events (verify)
+-> hitvel, the hit velocity used for window breaking events (verify)
 */
 ROSEAPI void eventupdatevehicle(int v, VehicleUpdateIndex ut, int part, Vector* pos, Vector* hitvel);
 
@@ -788,7 +788,7 @@ ROSEAPI void eventcreateexplosion(Vector* pos);
 /*
 checks if the line from posa to posb interacts with the triangle defined by tria, trib, tric
 
-- ! posa, posb, tria, trib, tric cannot be NULL (can out, normal, and out be?)
+- ! posa, posb, tria, trib, tric, out, normal, outfraction cannot be NULL
 
 -> out, the place the intersection happened
 -> normal, the normal
@@ -811,7 +811,7 @@ checks if the line from posa to posb intersects a human
 
 -> h, a valid human index, see MaxNumberOf
 -> posa, start of the line
--> posb, start of the line
+-> posb, end of the line
 -> pad, padding
 
 --> nonzero on success
@@ -971,7 +971,7 @@ creates a bond
 - !! signature changes based on the create bond index, see enum CreateBondIndex
 
 -/
-bondcreate(CREATEBOND_BODYTOLEVEL, int bodyid, Vector* localpos, Vector* global);
+bondcreate(CREATEBOND_BODYTOLEVEL, int bodyid, Vector* localpos, Vector* globalpos);
 bondcreate(CREATEBOND_BODYTOBODY, int bodya, int bodyb, Vector* alocal, Vector* blocal);
 bondcreate(CREATEBOND_BODYBODYROT, int bodya, int bodyb);
 /-
@@ -1728,7 +1728,7 @@ struct TrafficCar {
     char __unkpad79[32];
 };
 
-/* ENUMS */
+// ENUMS
 
 enum SoundIndex {
     SOUND_CAR_ENGINE = 8,
